@@ -1,4 +1,4 @@
-## Server of SciQuest 
+## Server template for G01 CTF 
 
 此项目旨在开发用于SciQuest的服务器.
 
