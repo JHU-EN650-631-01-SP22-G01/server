@@ -4,16 +4,14 @@ from typing import Any
 from pymysql import Connection
 
 
-class AbsSqlStmtHolder(object):
-    __metaclass__ = abc.ABCMeta
+class AbsSqlStmtHolder(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
     def create_db(self) -> str: pass
 
 
-class AbsTableHandler(object):
-    __metaclass__ = abc.ABCMeta
+class AbsTableHandler(metaclass=abc.ABCMeta):
 
     def __init__(self, connection: Connection, stmts: AbsSqlStmtHolder):
         with connection.cursor() as cursor:
