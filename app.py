@@ -1,6 +1,7 @@
 import os, datetime
 from dotenv import load_dotenv
 from flask import Flask, request
+from flask-login import LoginManager
 from jinja2 import Environment, FileSystemLoader
 
 # Set environment variables for APIs
@@ -13,6 +14,8 @@ app = Flask(__name__)
 # 24bits random secret key for XSS
 app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
@@ -20,6 +23,7 @@ templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 
 
+# route
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(

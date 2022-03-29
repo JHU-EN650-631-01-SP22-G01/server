@@ -11,7 +11,7 @@
 #### 2. Download
 您可以使用Git指令下载此程序, 
 ```
-$ git clone https://github.com/SciQuestDevelopment/Server.git
+$ git clone https://github.com/JHU-EN650-631-01-SP22-G01/server.git
 ``` 
 
 #### 3. Virtual environment (Optional but suggested) 
@@ -38,8 +38,6 @@ $ source path_to_venv/bin/activate
 
 当完整安装所有依赖的第三方库之后, 在运行服务器之前需要预先设置一些环境变量. 
 如果安装了python-dotenv库, 您可以通过添加`.env` 文件来设置. 
-如果是SciQuest的开发者, 请从通过 [此链接](https://share.weiyun.com/IVUVQy8u) 下载文件. 
-然后将文件命名为`.env`后放置到项目根目录中. 
 如果需要自定义`.env` 文件, 请为下列变量赋值
 
 ```
