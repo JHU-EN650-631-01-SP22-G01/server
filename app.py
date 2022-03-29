@@ -19,17 +19,18 @@ app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 
+
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        sections = ['article', 'form'], 
+        sections = ['article', 'form', 'auth', 'error'], 
         department_name = 'this department'
     )
 
 @app.route('/article', methods=['GET'])
 def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
-        sections = ['article', 'form'], 
+        sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'article', 
         date_time = 'ANY TIME', 
         subsections = {
@@ -42,43 +43,50 @@ def test_article():
 @app.route('/form', methods=['GET'])
 def test_form(): 
     return j2_env.get_template('section_form.jinja').render(
-        sections = ['article', 'form'], 
+        sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
-        auth_page = 'auth'
+        next_page = 'posted'
     )
 
-@app.route('/newpage', methods=['GET'])
-def test_newpage(): 
+@app.route('/posted', methods=['POST'])
+def test_posted(): 
+    posted_code = request.form.get('code', 'default')
     return j2_env.get_template('section_article.jinja').render(
-        sections = ['article', 'form', 'newpage'], 
-        section_name = 'NAME', 
+        sections = ['article', 'form', 'auth', 'error'], 
+        section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
         subsections = {
-            'subsection1': 'content for subjection', 
-            'subsection2': 'content for subjection', 
-            'subsection3': 'content for subjection', 
+            'your posted code is ': str(posted_code), 
         }
     )
 
-@app.route('/auth', methods=['POST'])
+@app.route('/auth', methods=['GET'])
 def test_auth(): 
-    auth_code = request.form.get('code', 'default')
+    return j2_env.get_template('section_auth.jinja').render(
+        sections = ['article', 'form', 'auth', 'error'], 
+        section_name = 'auth', 
+        date_time = 'ANY TIME', 
+        next_page = 'authed'
+    )
+
+@app.route('/authed', methods=['POST'])
+def test_authed(): 
+    username = request.form.get('username', 'guest')
+    password = request.form.get('password', 'guest')
     return j2_env.get_template('section_article.jinja').render(
-        sections = ['article', 'form'], 
-        section_name = auth_code, 
+        sections = ['article', 'form', 'auth', 'error'], 
+        section_name = 'AFTER AUTH', 
         date_time = 'ANY TIME', 
         subsections = {
-            'subsection1': 'content for subjection', 
-            'subsection2': 'content for subjection', 
-            'subsection3': 'content for subjection', 
+            'YOUR USERNAME': username, 
+            'YOUR PASSWORD': password
         }
     )
 
-@app.route('/testerror', methods=['GET'])
+@app.route('/error', methods=['GET'])
 def test_error(): 
     raise Exception("SOMETHING")
-    return None
 
 if __name__ == '__main__':
     app.run()
