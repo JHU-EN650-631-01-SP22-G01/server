@@ -23,7 +23,7 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
         sections = ['article', 'form'], 
-        department_name = 'test'
+        department_name = 'this department'
     )
 
 @app.route('/article', methods=['GET'])
@@ -48,6 +48,19 @@ def test_form():
         auth_page = 'auth'
     )
 
+@app.route('/newpage', methods=['GET'])
+def test_newpage(): 
+    return j2_env.get_template('section_article.jinja').render(
+        sections = ['article', 'form', 'newpage'], 
+        section_name = 'NAME', 
+        date_time = 'ANY TIME', 
+        subsections = {
+            'subsection1': 'content for subjection', 
+            'subsection2': 'content for subjection', 
+            'subsection3': 'content for subjection', 
+        }
+    )
+
 @app.route('/auth', methods=['POST'])
 def test_auth(): 
     auth_code = request.form.get('code', 'default')
@@ -61,6 +74,11 @@ def test_auth():
             'subsection3': 'content for subjection', 
         }
     )
+
+@app.route('/testerror', methods=['GET'])
+def test_error(): 
+    raise Exception("SOMETHING")
+    return None
 
 if __name__ == '__main__':
     app.run()
