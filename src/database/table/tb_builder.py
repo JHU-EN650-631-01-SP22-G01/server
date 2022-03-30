@@ -1,11 +1,7 @@
-import logging
-import os
+import os, pymysql, logging
 from typing import Optional
-
-import pymysql
-from .table.article import ArticleTable
-from .table.author import AuthorTable
-from .table.user import UserTable
+from .user import UserTable
+from .article import ArticleTable
 
 
 class __TableBuilder(object):

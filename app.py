@@ -1,7 +1,10 @@
 import os, datetime
 from dotenv import load_dotenv
 from flask import Flask, request
+from flask_login import LoginManager
 from jinja2 import Environment, FileSystemLoader
+
+from src.auth.user import User
 
 # Set environment variables for APIs
 project_root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -10,9 +13,15 @@ if os.path.exists(dotenv_path): load_dotenv(dotenv_path, override=True)
 
 app = Flask(__name__)
 
-# 24bits random secret key for XSS
+# Authentication Mechanism
 app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
@@ -63,7 +72,7 @@ def test_posted():
     )
 
 @app.route('/auth', methods=['GET'])
-def test_auth(): 
+def test_auth():
     return j2_env.get_template('section_auth.jinja').render(
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'auth', 
