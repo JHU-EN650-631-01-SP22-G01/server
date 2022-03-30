@@ -4,8 +4,6 @@ from flask import Flask, request
 from flask_login import LoginManager
 from jinja2 import Environment, FileSystemLoader
 
-from src.auth.user import User
-
 # Set environment variables for APIs
 project_root_dir = os.path.abspath(os.path.dirname(__file__))
 dotenv_path = os.path.join(project_root_dir, '.env')
@@ -33,6 +31,7 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         department_name = 'this department'
     )
@@ -40,6 +39,7 @@ def department_main():
 @app.route('/article', methods=['GET'])
 def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'article', 
         date_time = 'ANY TIME', 
@@ -53,6 +53,7 @@ def test_article():
 @app.route('/form', methods=['GET'])
 def test_form(): 
     return j2_env.get_template('section_form.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
@@ -63,6 +64,7 @@ def test_form():
 def test_posted(): 
     posted_code = request.form.get('code', 'default')
     return j2_env.get_template('section_article.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
@@ -74,6 +76,7 @@ def test_posted():
 @app.route('/auth', methods=['GET'])
 def test_auth():
     return j2_env.get_template('section_auth.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'auth', 
         date_time = 'ANY TIME', 
@@ -85,6 +88,7 @@ def test_authed():
     username = request.form.get('username', 'guest')
     password = request.form.get('password', 'guest')
     return j2_env.get_template('section_article.jinja').render(
+        theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'AFTER AUTH', 
         date_time = 'ANY TIME', 
