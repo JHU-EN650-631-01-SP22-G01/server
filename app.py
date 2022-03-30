@@ -1,7 +1,6 @@
 import os, datetime
 from dotenv import load_dotenv
 from flask import Flask, request
-from flask-login import LoginManager
 from jinja2 import Environment, FileSystemLoader
 
 # Set environment variables for APIs
