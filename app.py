@@ -1,31 +1,36 @@
-import os, datetime
-from dotenv import load_dotenv
-from flask import Flask, request
-from flask_login import LoginManager
+import os, dotenv, datetime
+
+from flask import Flask, redirect, url_for, request
 from jinja2 import Environment, FileSystemLoader
+
+from src.auth import utils as login_utils
+from src.sqlalchemy import utils as db_utils
+from src.forms import LoginForm, SearchForm
 
 # Set environment variables for APIs
 project_root_dir = os.path.abspath(os.path.dirname(__file__))
 dotenv_path = os.path.join(project_root_dir, '.env')
-if os.path.exists(dotenv_path): load_dotenv(dotenv_path, override=True)
+if os.path.exists(dotenv_path): dotenv.load_dotenv(dotenv_path, override=True)
 
 app = Flask(__name__)
+app.app_context().push()
 
-# Authentication Mechanism
+# secret key
 app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
-login_manager = LoginManager()
-login_manager.init_app(app)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
+# database initialise
+db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
+db_manager.create_all()
+
+# login manager initialise
+login_manager = login_utils.init_manager(app)
+login_manager.login_view = '/auth'
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
-
 
 # route
 @app.route('/', methods=['GET'])
@@ -52,54 +57,98 @@ def test_article():
 
 @app.route('/form', methods=['GET'])
 def test_form(): 
-    return j2_env.get_template('section_form.jinja').render(
+    return j2_env.get_template('section_basic_form.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
-        next_page = 'posted'
+        form = SearchForm(),
+        submit_to = '/posted'
     )
 
 @app.route('/posted', methods=['POST'])
 def test_posted(): 
-    posted_code = request.form.get('code', 'default')
+    search_form = SearchForm()
+    if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
         subsections = {
-            'your posted code is ': str(posted_code), 
+            'your posted code is ': search_form.input.data, 
         }
     )
 
-@app.route('/auth', methods=['GET'])
+@app.route('/auth', methods=['GET', 'POST'])
 def test_auth():
-    return j2_env.get_template('section_auth.jinja').render(
+    if login_utils.current_user.is_authenticated: 
+        login_utils.logout_user()
+        return j2_env.get_template('section_basic_form.jinja').render(
+            theme_colour = 'black',
+            sections = ['article', 'form', 'auth', 'error'], 
+            section_name = 'LOGOUT', 
+            date_time = 'ANY TIME', 
+            form = LoginForm(),
+            submit_to = '/auth'
+        )
+    if request.method == 'GET': 
+        return j2_env.get_template('section_basic_form.jinja').render(
+            theme_colour = 'black',
+            sections = ['article', 'form', 'auth', 'error'], 
+            section_name = 'AUTH', 
+            date_time = 'ANY TIME', 
+            form = LoginForm(),
+            submit_to = '/auth'
+        )
+    login_form = LoginForm()
+    if not login_form.validate_on_submit(): 
+        return j2_env.get_template('section_basic_form.jinja').render(
+            theme_colour = 'black',
+            sections = ['article', 'form', 'auth', 'error'], 
+            section_name = 'NOT VALID ON SUBMIT', 
+            date_time = 'ANY TIME', 
+            form = LoginForm(),
+            submit_to = '/auth'
+        )
+    if not db_utils.is_correct(
+        username = login_form.username.data, 
+        password = login_form.password.data
+    ): return j2_env.get_template('section_basic_form.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'auth', 
+        section_name = 'INCORRECT PASSWORD OR USERNAME', 
         date_time = 'ANY TIME', 
-        next_page = 'authed'
+        form = LoginForm(),
+        submit_to = '/auth'
     )
+    user_session = login_utils.UserSession(login_form.username.data)
+    login_utils.login_user(user_session)
+    return redirect('authed')
 
-@app.route('/authed', methods=['POST'])
+     
+
+@app.route('/authed', methods=['GET'])
+@login_utils.login_required
 def test_authed(): 
-    username = request.form.get('username', 'guest')
-    password = request.form.get('password', 'guest')
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'AFTER AUTH', 
+        section_name = str(login_utils.current_user.get_id()), 
         date_time = 'ANY TIME', 
-        subsections = {
-            'YOUR USERNAME': username, 
-            'YOUR PASSWORD': password
-        }
+        subsections = {}
     )
 
 @app.route('/error', methods=['GET'])
 def test_error(): 
+    return j2_env.get_template('error.jinja').render(
+        theme_colour = 'black',
+        sections = ['article', 'form', 'auth', 'error'], 
+        error_message = 'THIS IS ERROR PAGE'
+    )
+
+@app.route('/exception', methods=['GET'])
+def test_exception(): 
     raise Exception("SOMETHING")
 
 if __name__ == '__main__':
