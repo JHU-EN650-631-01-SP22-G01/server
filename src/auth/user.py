@@ -18,11 +18,20 @@ class UserSession(UserMixin):
     def is_active(self):
         return True
 
-    def get_id(self):
+    def get_id(self) -> str:
         return self.__db_user.id
 
-    def get_db(self): 
+    @property
+    def db_orc(self) -> UserDbModel: 
         return self.__db_user
+    
+    @property
+    def name(self) -> str: 
+        return self.__db_user.username
+
+    @property
+    def home(self) -> str: 
+        return f'files/{self.__db_user.username}'
 
     @classmethod
     def get(cls, by_uid: str) -> UserSession: 

@@ -27,7 +27,6 @@ class UserDbModel(db_model):
         if by_uid is not None: 
             return UserDbModel.query.filter_by(id=by_uid).first()
         elif by_uname is not None: 
-            print(by_uname, flush=True)
             return UserDbModel.query.filter_by(username=by_uname).first()
         else: 
             return None

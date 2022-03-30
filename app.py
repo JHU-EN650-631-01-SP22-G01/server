@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 
-from flask import Flask, redirect, request
+from flask import Flask, request, redirect, send_from_directory
 from jinja2 import Environment, FileSystemLoader
 
 from src.auth import utils as login_utils
@@ -37,7 +37,7 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         department_name = 'this department'
     )
 
@@ -45,7 +45,7 @@ def department_main():
 def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'article', 
         date_time = 'ANY TIME', 
         subsections = {
@@ -59,7 +59,7 @@ def test_article():
 def test_form(): 
     return j2_env.get_template('section_basic_form.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
         form = SearchForm(),
@@ -72,7 +72,7 @@ def test_posted():
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
         subsections = {
@@ -85,7 +85,7 @@ def test_auth():
     if request.method == 'GET': 
         return j2_env.get_template('section_basic_form.jinja').render(
             theme_colour = 'black',
-            sections = ['article', 'form', 'auth', 'error'], 
+            sections = ['article', 'form', 'auth', 'files', 'error'], 
             section_name = 'AUTH', 
             date_time = 'ANY TIME', 
             form = LoginForm(),
@@ -95,13 +95,13 @@ def test_auth():
     if not login_form.validate_on_submit(): 
         return j2_env.get_template('error.jinja').render(
             theme_colour = 'black',
-            sections = ['article', 'form', 'auth', 'error'], 
+            sections = ['article', 'form', 'auth', 'files', 'error'], 
             error_message = 'NOT VALID ON SUBMIT', 
         )
     if not db_utils.is_correct(login_form.username.data, login_form.password.data): 
         return j2_env.get_template('error.jinja').render(
             theme_colour = 'black',
-            sections = ['article', 'form', 'auth', 'error'], 
+            sections = ['article', 'form', 'auth', 'files', 'error'], 
             error_message = 'INCORRECT PASSWORD OR USERNAME', 
         )
     user_session = login_utils.UserSession(login_form.username.data)
@@ -113,17 +113,51 @@ def test_auth():
 def test_authed(): 
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = str(login_utils.current_user.get_id()), 
         date_time = 'ANY TIME', 
         subsections = {}
     )
 
+@app.route('/files', methods=['GET'])
+@login_utils.login_required
+def dirtree():
+    def make_tree(path):
+        tree = dict(name=os.path.basename(path), children=[])
+        try: 
+            lst = os.listdir(path)
+        except OSError:
+            pass #ignore errors
+        else:
+            for name in lst:
+                fn = os.path.join(path, name)
+                if os.path.isdir(fn):
+                    tree['children'].append(make_tree(fn))
+                else:
+                    tree['children'].append(dict(name=name))
+        return tree
+    
+    abs_usr_dir = os.path.join(app.config['UPLOAD_FOLDER'], login_utils.current_user.home)
+    if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
+    return j2_env.get_template('section_filesystem.jinja').render(
+        theme_colour = 'black',
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
+        section_name = login_utils.current_user.name,
+        tree = make_tree(abs_usr_dir)
+    )
+
+@app.route('/files/<path:filename>', methods=['GET'])
+@login_utils.login_required
+def test_download(filename):
+    abs_usr_dir = os.path.join(app.config['UPLOAD_FOLDER'], login_utils.current_user.home)
+    if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
+    return send_from_directory(directory=abs_usr_dir, filename=filename)
+
 @app.route('/error', methods=['GET'])
 def test_error(): 
     return j2_env.get_template('error.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         error_message = 'THIS IS ERROR PAGE'
     )
 
