@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, request
 from jinja2 import Environment, FileSystemLoader
 
 from src.auth import utils as login_utils
@@ -82,16 +82,6 @@ def test_posted():
 
 @app.route('/auth', methods=['GET', 'POST'])
 def test_auth():
-    if login_utils.current_user.is_authenticated: 
-        login_utils.logout_user()
-        return j2_env.get_template('section_basic_form.jinja').render(
-            theme_colour = 'black',
-            sections = ['article', 'form', 'auth', 'error'], 
-            section_name = 'LOGOUT', 
-            date_time = 'ANY TIME', 
-            form = LoginForm(),
-            submit_to = '/auth'
-        )
     if request.method == 'GET': 
         return j2_env.get_template('section_basic_form.jinja').render(
             theme_colour = 'black',
@@ -103,30 +93,20 @@ def test_auth():
         )
     login_form = LoginForm()
     if not login_form.validate_on_submit(): 
-        return j2_env.get_template('section_basic_form.jinja').render(
+        return j2_env.get_template('error.jinja').render(
             theme_colour = 'black',
             sections = ['article', 'form', 'auth', 'error'], 
-            section_name = 'NOT VALID ON SUBMIT', 
-            date_time = 'ANY TIME', 
-            form = LoginForm(),
-            submit_to = '/auth'
+            error_message = 'NOT VALID ON SUBMIT', 
         )
-    if not db_utils.is_correct(
-        username = login_form.username.data, 
-        password = login_form.password.data
-    ): return j2_env.get_template('section_basic_form.jinja').render(
-        theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'INCORRECT PASSWORD OR USERNAME', 
-        date_time = 'ANY TIME', 
-        form = LoginForm(),
-        submit_to = '/auth'
-    )
+    if not db_utils.is_correct(login_form.username.data, login_form.password.data): 
+        return j2_env.get_template('error.jinja').render(
+            theme_colour = 'black',
+            sections = ['article', 'form', 'auth', 'error'], 
+            error_message = 'INCORRECT PASSWORD OR USERNAME', 
+        )
     user_session = login_utils.UserSession(login_form.username.data)
     login_utils.login_user(user_session)
     return redirect('authed')
-
-     
 
 @app.route('/authed', methods=['GET'])
 @login_utils.login_required

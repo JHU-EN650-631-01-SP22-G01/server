@@ -6,8 +6,8 @@ from ..sqlalchemy import UserDbModel
 
 class UserSession(UserMixin):
 
-    def __init__(self, name: str, db_user: Optional[UserDbModel]=None):
-        self.__db_user= db_user if db_user is not None else UserDbModel.find(by_uname=name)
+    def __init__(self, uname: str, db_user: Optional[UserDbModel]=None):
+        self.__db_user= db_user if db_user is not None else UserDbModel.find(by_uname=uname)
     
     def is_authenticated(self):
         return True
@@ -20,6 +20,9 @@ class UserSession(UserMixin):
 
     def get_id(self):
         return self.__db_user.id
+
+    def get_db(self): 
+        return self.__db_user
 
     @classmethod
     def get(cls, by_uid: str) -> UserSession: 
