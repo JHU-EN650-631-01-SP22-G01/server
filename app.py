@@ -13,8 +13,6 @@ app = Flask(__name__)
 # 24bits random secret key for XSS
 app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
