@@ -29,10 +29,6 @@ class UserSession(UserMixin):
     def name(self) -> str: 
         return self.__db_user.username
 
-    @property
-    def home(self) -> str: 
-        return f'files/{self.__db_user.username}'
-
     @classmethod
     def get(cls, by_uid: str) -> UserSession: 
         db_user = UserDbModel.find(by_uid=by_uid)

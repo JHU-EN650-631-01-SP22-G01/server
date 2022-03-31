@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 
-from flask import Flask, request, redirect, send_from_directory
+from flask import Flask, request, redirect, send_file, send_from_directory
 from jinja2 import Environment, FileSystemLoader
 
 from src.auth import utils as login_utils
@@ -14,6 +14,7 @@ if os.path.exists(dotenv_path): dotenv.load_dotenv(dotenv_path, override=True)
 
 app = Flask(__name__)
 app.app_context().push()
+app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
 app.config['SECRET_KEY'] = str(os.urandom(24))
@@ -137,21 +138,26 @@ def dirtree():
                     tree['children'].append(dict(name=name))
         return tree
     
-    abs_usr_dir = os.path.join(app.config['UPLOAD_FOLDER'], login_utils.current_user.home)
+    abs_usr_dir = os.path.join(app.config['FILE_SYSTEM_ROOT'], login_utils.current_user.name)
     if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
     return j2_env.get_template('section_filesystem.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
-        section_name = login_utils.current_user.name,
+        section_name = f'Private directory of {login_utils.current_user.name}',
+        username = login_utils.current_user.name,
         tree = make_tree(abs_usr_dir)
     )
 
 @app.route('/files/<path:filename>', methods=['GET'])
 @login_utils.login_required
-def test_download(filename):
-    abs_usr_dir = os.path.join(app.config['UPLOAD_FOLDER'], login_utils.current_user.home)
-    if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
-    return send_from_directory(directory=abs_usr_dir, filename=filename)
+def test_download(filename: str):
+    if filename.startswith(login_utils.current_user.name): 
+        return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
+    else: return j2_env.get_template('error.jinja').render(
+        theme_colour = 'black',
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
+        error_message = 'INVALID ACCESS'
+    )
 
 @app.route('/error', methods=['GET'])
 def test_error(): 
