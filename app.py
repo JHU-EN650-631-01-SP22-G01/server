@@ -36,9 +36,10 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        department_name = 'this department'
+        theme_colour = 'red',
+        sections = ['error'], 
+        department_name = 'Restricted Area: NO UNAUTHORIZED PERSONNEL BEYOND THIS POINT',
+        head = 'Arsenal'
     )
 
 @app.route('/article', methods=['GET'])
@@ -60,8 +61,7 @@ def test_form():
     return j2_env.get_template('section_basic_form.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'form', 
-        date_time = 'ANY TIME', 
+        section_name = 'form',  
         form = SearchForm(),
         submit_to = '/posted'
     )
@@ -72,12 +72,9 @@ def test_posted():
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'AFTER POST', 
-        date_time = 'ANY TIME', 
-        subsections = {
-            'your posted code is ': search_form.input.data, 
-        }
+        sections = ['error'], 
+        section_name = 'Gravity Axe', 
+        subsections = {}
     )
 
 @app.route('/auth', methods=['GET', 'POST'])
@@ -85,7 +82,7 @@ def test_auth():
     if request.method == 'GET': 
         return j2_env.get_template('section_basic_form.jinja').render(
             theme_colour = 'black',
-            sections = ['article', 'form', 'auth', 'error'], 
+            sections = ['auth', 'error'], 
             section_name = 'AUTH', 
             date_time = 'ANY TIME', 
             form = LoginForm(),
@@ -111,11 +108,14 @@ def test_auth():
 @app.route('/authed', methods=['GET'])
 @login_utils.login_required
 def test_authed(): 
-    return j2_env.get_template('section_article.jinja').render(
+    return j2_env.get_template('authed_page.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        section_name = str(login_utils.current_user.get_id()), 
-        date_time = 'ANY TIME', 
+        sections = [], 
+        section_name = '@FLAG@' + str(login_utils.current_user.get_id()) +'$FLAG$',
+        result = 'You have successfully entered Arsenal!!!',
+        result2 = 'Now it is your time to choose the most powerful weapon.',
+        form = SearchForm(),
+        submit_to = '/posted',
         subsections = {}
     )
 
@@ -123,8 +123,9 @@ def test_authed():
 def test_error(): 
     return j2_env.get_template('error.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        error_message = 'THIS IS ERROR PAGE'
+        sections = ['error'],
+        section_name ='error',
+        error_message = 'THIS IS AN ERROR PAGE'
     )
 
 @app.route('/exception', methods=['GET'])

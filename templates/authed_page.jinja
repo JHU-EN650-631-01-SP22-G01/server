@@ -30,12 +30,19 @@
     <hr />
     <main id="main" role="main">
         <h1>{{ section_name.upper() }}</h1>
-        <h3> Congrats!! You have obtained THE FLAG along with THE WEAPON THE GRAVITY AXE!</h3>
         {% for title, content in subsections.items() %}
             <h2>{{ title }}</h2>
             <p> {{ content }} </p>
         {% endfor %}
     </main>
+    <p>{{result}}</p>
+    <p>{{result2}}</p>
+    <div class="form-container">
+    <form action="{{ submit_to }}" method="post">
+    {{ form.hidden_tag() }}
+    {% for field in form %} {{ field() }} {% endfor %}
+    </form>
+    </div>
     <hr />
     <footer class="footer" role="contentinfo">  </footer>
 </body>
