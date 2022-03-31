@@ -1,53 +1,52 @@
-## 安装和运行文档
+## Install and run the documentation
 
 #### 1. Overall
 
-服务器(文中称为此程序)基于Python3.6开发, 在任何低于这个版本的Python中我们不保证此程序可以运行. 
-此程序依赖的必须库有`flask` 和 `PyMySQL`. 下表详细展示了此程序用到所有第三方库及其版本: 
+The server (called this program in this article) is developed based on Python 3.6, and we do not guarantee that this program will work in any version of Python lower than this.
+The required libraries that this program depends on are `flask` ​​and `PyMySQL`. The following table details all third-party libraries and their versions used by this program:
 
 | LIBs | Flask | PyMySQl | Python-dotenv |
 |:----:|:-----:|:-------:|:-------------:|
-| VERs | 1.1.2 |  0.10.1 |     0.14.0    |
+| VERs | 1.1.2 | 0.10.1 | 0.14.0 |
 
 #### 2. Download
 
-您可以使用Git指令下载此程序, 
-```
+You can download this program using Git commands,
+````
 $ git clone https://github.com/JHU-EN650-631-01-SP22-G01/server.git
-``` 
+````
 
-#### 3. Virtual environment (Optional but suggested) 
+#### 3. Virtual environment (Optional but suggested)
 
-为下载必须的第三方Python库, 我们建议使用虚拟环境. 可以通过以下指令初始化并激活虚拟环境, 
+To download the necessary third-party Python libraries, we recommend using a virtual environment. The virtual environment can be initialized and activated with the following commands,
 
 ```bash
-// 安装 virtualenv 
-$ pip install virtualenv 
-// 创建虚拟环境
-$ virtualenv  name_for_the_venv
-// 激活虚拟环境
+// install virtualenv
+$ pip install virtualenv
+// create virtual environment
+$ virtualenv name_for_the_venv
+// activate the virtual environment
 $ source path_to_venv/bin/activate
-```
+````
 
 #### 4. Installation packages
 
-我们建议直接使用, `requirement.txt`文件来安装必须的第三方库. 可以通过以下指令安装
+We recommend using the `requirement.txt` file directly to install the necessary third-party libraries. It can be installed by the following command
 
-```
-(venv)$ pip install -r requirement.txt 
-```
+````
+(venv)$ pip install -r requirement.txt
+````
 
-当完整安装所有依赖的第三方库之后, 在运行服务器之前需要预先设置一些环境变量. 如果安装了python-dotenv库, 您可以通过添加`.env` 文件来设置. 如果需要自定义`.env` 文件, 请为下列变量赋值. 更多关于DB_URI的描述，请参考[官方文档](https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/). 如仅用于开发过程，可以不配置此文件，系统将会自动采用SQLite数据库。
+When all the dependent third-party libraries are fully installed, some environment variables need to be set in advance before running the server. If the python-dotenv library is installed, you can set it by adding the `.env` file. If you need to customize the `.env` file, please assign values ​​to the following variables. For more information about DB_URI, please refer to [official documentation](https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/). For development only , you can not configure this file, the system will automatically use the SQLite database.
 
-```
-// 数据库URI
+````
+// database URI
 DB_URI=?
-```
+````
 
-#### 5. Running 
+#### 5. Running
 
-请使用如下指令运行此程序
+Please use the following command to run this program
 
-```
+````
 (venv)$ flask run
-```

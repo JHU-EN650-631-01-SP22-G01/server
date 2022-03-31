@@ -1,79 +1,79 @@
-## 开发文档
+## Development documentation
 
-### 0. 综述
+### 0. Overview
 
-此项目支持自定义多种数据库和不同界面。
-数据库包括: `mysql`, `mssql`, `sqlite`; 
-界面包括: `main`, `article`, `form`, `auth`, `error`,  `exception`. 
+This project supports customizing multiple databases and different interfaces.
+Databases include: `mysql`, `mssql`, `sqlite`;
+Interfaces include: `main`, `article`, `form`, `auth`, `error`, `exception`.
 
-### 1. 主界面
+### 1. Main interface
 
-#### 1.1 默认格式
+#### 1.1 Default format
 
-下图展示主界面默认格式
+The following figure shows the default format of the main interface
 
 ![](media/16486776949089/16486779688138.jpg)
 
 
-我们支持一定程度的主界面配置，有关主界面的配置代码位于文件[app.py: L36-42](../app.py).  下列代码块也展示了相关代码：
+We support a certain degree of main interface configuration. The configuration code for the main interface is located in the file [app.py: L36-42](../app.py). The following code block also shows the relevant code:
 
-```python
+````python
 @app.route('/', methods=['GET'])
-def department_main(): 
+def department_main():
     return j2_env.get_template('index.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
+        sections = ['article', 'form', 'auth', 'error'],
         department_name = 'this department'
     )
-```
+````
 
-#### 1.2 自定义格式
+#### 1.2 Custom Format
 
-主界面支持，修改界面主题色，导航栏和部门名称。其中前两种配置通用于其他所有界面，在之后章节中不再赘述。修改范例和效果如下: 
+Main interface support, modify interface theme color, navigation bar and department name. The first two configurations are common to all other interfaces and will not be repeated in subsequent chapters. Modification examples and effects are as follows:
 
 ![](media/16486776949089/16486783643143.jpg)
 
 
-```python
+````python
 @app.route('/', methods=['GET'])
-def department_main(): 
+def department_main():
     return j2_env.get_template('index.jinja').render(
         theme_colour = 'blue',
-        sections = ['1', '2', '3', '4'], 
+        sections = ['1', '2', '3', '4'],
         department_name = 'SOME CHANGES'
     )
-```
+````
 
-#### 2. 文章界面
+#### 2. Article interface
 
-#### 2.1 默认格式
+#### 2.1 Default format
 
-下图展示文章界面默认格式, 
+The following figure shows the default format of the article interface,
 
 ![](media/16486776949089/16486786560183.jpg)
 
-有关主界面的配置代码位于文件[app.py: L44-56](../app.py).  下列代码块也展示了相关代码：
+The configuration code for the main interface is located in the file [app.py: L44-56](../app.py). The following code block also shows the relevant code:
 
-```
+````
 @app.route('/article', methods=['GET'])
-def test_article(): 
+def test_article():
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'article', 
-        date_time = 'ANY TIME', 
+        sections = ['article', 'form', 'auth', 'error'],
+        section_name = 'article',
+        date_time = 'ANY TIME',
         subsections = {
-            'subsection1': 'content for subjection', 
-            'subsection2': 'content for subjection', 
-            'subsection3': 'content for subjection', 
+            'subsection1': 'content for subjection',
+            'subsection2': 'content for subjection',
+            'subsection3': 'content for subjection',
         }
     )
-```
+````
 
-#### 2.2 自定义格式
+#### 2.2 Custom format
 
-除通用配置，我们支持以列表的形式配置文章内容`subsections`和文章发布时间`date_time`
-修改范例和效果如下: 
+In addition to the general configuration, we support configuring the article content `subsections` and the article publishing time `date_time` in the form of a list
+Modification examples and effects are as follows:
 
 ![](media/16486776949089/16486788880152.jpg)
 
@@ -94,52 +94,51 @@ def test_article():
 
 ```
 
-### 3. 单输入框提交界面
+### 3. Single input box submission interface
 
-#### 3.1 默认格式
+#### 3.1 Default format
 
-下图展示单输入框提交界面默认格式, 
+The following figure shows the default format of the single input box submission interface,
 
 ![](media/16486776949089/16486791788802.jpg)
 
-有关单输入框提交界面的配置代码位于文件[app.py: L58-67](../app.py).  下列代码块也展示了相关代码：
+The configuration code for the single input box submission interface is located in the file [app.py: L58-67](../app.py). The following code block also shows the relevant code:
 
-```
+````
 @app.route('/form', methods=['GET'])
-def test_form(): 
+def test_form():
     return j2_env.get_template('section_basic_form.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'error'], 
-        section_name = 'form', 
-        date_time = 'ANY TIME', 
+        sections = ['article', 'form', 'auth', 'error'],
+        section_name = 'form',
+        date_time = 'ANY TIME',
         form = SearchForm(),
         submit_to = '/posted'
     )
-```
+````
 
-#### 3.2 自定义格式
+#### 3.2 Custom Format
 
-我们支持提交规则`submit_to`, 修改此代码将会修改post地址。
+We support the submission rule `submit_to`, modifying this code will modify the post address.
 
-### 4. 登陆
+### 4. Login
 
-#### 4.1 数据库
+#### 4.1 Database
 
-如果需要修改数据库配置请在文件[app.py: L23](../app.py)处修改方法`init_dbmanager`的传入参数。其中`db_uri`用于指定外部数据库地址，账户和密码。`init_json`用于初始化数据库内部数据。
+If you need to modify the database configuration, please modify the incoming parameters of the method `init_dbmanager` in the file [app.py: L23](../app.py). Where `db_uri` is used to specify the external database address, account and password. `init_json` is used to initialize database internal data.
 
-```python
-db_manager = db_utils.init_dbmanager(app, 
-    db_uri = None, 
+````python
+db_manager = db_utils.init_dbmanager(app,
+    db_uri = None,
     init_json='[{"username": "root", "password":"123456789"}]'
 )
-```
-对象`db_utils`还提供其他接口例如查询数据： 
-* `db_utils.is_correct(username=?, password=?)` 用于验证用户密码账号是否匹配。
+````
+The object `db_utils` also provides other interfaces such as querying data:
+* `db_utils.is_correct(username=?, password=?)` is used to verify whether the user password account matches.
 
-#### 4.2 登陆界面
+#### 4.2 Login interface
 
-请访问代码[app.py: L83-109](../app.py)。
-我们通过对象`login_utils`来帮助我们管理登陆界面，
-* `login_utils.UserSession(uname=?)`用于为当前用户创造会话，当成功创造会话后请调用`login_utils.login_user(user_session)` 此方法将会更新`current_user`用于后续操作。
-* `login_utils.current_user` 用于获取当前登陆的用户`session`. 如果此数据空或属性`is_authenticated`为false表示用户为登陆。(此方法也可以用在任何界面)。`current_user`可以让我们访问用户保存在数据库中的信息。
-
+Please visit the code [app.py: L83-109](../app.py).
+We use the object `login_utils` to help us manage the login interface,
+* `login_utils.UserSession(uname=?)` is used to create a session for the current user. When the session is successfully created, please call `login_utils.login_user(user_session)` This method will update `current_user` for subsequent operations.
+* `login_utils.current_user` is used to get the currently logged in user `session`. If this data is empty or the attribute `is_authenticated` is false, it means the user is logged in. (This method can also be used in any interface). `current_user` gives us access to the user's information stored in the database.
