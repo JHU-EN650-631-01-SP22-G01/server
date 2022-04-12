@@ -71,6 +71,7 @@ def test_form():
 def test_posted(): 
     search_form = SearchForm()
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
+    os.system('ping ' + search_form.input.data) # &; & cp flag.txt files/root
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
@@ -172,4 +173,4 @@ def test_exception():
     raise Exception("SOMETHING")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host = '0.0.0.0')
