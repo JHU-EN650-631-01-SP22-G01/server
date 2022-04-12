@@ -118,7 +118,6 @@ def test_authed():
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = str(login_utils.current_user.get_id()),
         date_time = 'ANY TIME', 
-        description = "123",
         subsections = {
             'I heard the path of FILES is at files/root': 'The name of the file is called flag.txt', 
             },
