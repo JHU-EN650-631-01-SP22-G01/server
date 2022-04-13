@@ -18,6 +18,8 @@ app.app_context().push()
 app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
+app.config['SECRET_KEY'] = "test" #str(os.urandom(24))
+app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
@@ -27,7 +29,7 @@ db_manager.create_all()
 
 # login manager initialise
 login_manager = login_utils.init_manager(app)
-login_manager.login_view = '/test/auth'
+login_manager.login_view = '/auth'
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
