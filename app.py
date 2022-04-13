@@ -17,7 +17,7 @@ app.app_context().push()
 app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
-app.config['SECRET_KEY'] = str(os.urandom(24))
+app.config['SECRET_KEY'] = "test" #str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 
 # database initialise
@@ -67,7 +67,7 @@ def test_form():
         submit_to = '/posted'
     )
 
-@app.route('/posted', methods=['POST'])
+@app.route('/posted', methods=['GET', 'POST'])
 def test_posted(): 
     search_form = SearchForm()
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
