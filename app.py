@@ -18,8 +18,6 @@ app.app_context().push()
 app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
-app.config['SECRET_KEY'] = str(os.urandom(24))
-app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
