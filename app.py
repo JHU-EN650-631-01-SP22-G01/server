@@ -26,7 +26,7 @@ db_manager.create_all()
 
 # login manager initialise
 login_manager = login_utils.init_manager(app)
-login_manager.login_view = '/auth'
+login_manager.login_view = '/test/auth'
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
@@ -37,7 +37,7 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         department_name = 'this department'
     )
@@ -45,7 +45,7 @@ def department_main():
 @app.route('/article', methods=['GET'])
 def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'article', 
         date_time = 'ANY TIME', 
@@ -59,7 +59,7 @@ def test_article():
 @app.route('/form', methods=['GET'])
 def test_form(): 
     return j2_env.get_template('section_basic_form.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
@@ -72,7 +72,7 @@ def test_posted():
     search_form = SearchForm()
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
@@ -85,7 +85,7 @@ def test_posted():
 def test_auth():
     if request.method == 'GET': 
         return j2_env.get_template('section_basic_form.jinja').render(
-            theme_colour = 'black',
+            theme_colour = '#003371',
             sections = ['article', 'form', 'auth', 'files', 'error'], 
             section_name = 'AUTH', 
             date_time = 'ANY TIME', 
@@ -95,13 +95,13 @@ def test_auth():
     login_form = LoginForm()
     if not login_form.validate_on_submit(): 
         return j2_env.get_template('error.jinja').render(
-            theme_colour = 'black',
+            theme_colour = '#003371',
             sections = ['article', 'form', 'auth', 'files', 'error'], 
             error_message = 'NOT VALID ON SUBMIT', 
         )
     if not db_utils.is_correct(login_form.username.data, login_form.password.data): 
         return j2_env.get_template('error.jinja').render(
-            theme_colour = 'black',
+            theme_colour = '#003371',
             sections = ['article', 'form', 'auth', 'files', 'error'], 
             error_message = 'INCORRECT PASSWORD OR USERNAME', 
         )
@@ -113,7 +113,7 @@ def test_auth():
 @login_utils.login_required
 def test_authed(): 
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = str(login_utils.current_user.get_id()), 
         date_time = 'ANY TIME', 
@@ -141,7 +141,7 @@ def dirtree():
     abs_usr_dir = os.path.join(app.config['FILE_SYSTEM_ROOT'], login_utils.current_user.name)
     if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
     return j2_env.get_template('section_filesystem.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         section_name = f'Private directory of {login_utils.current_user.name}',
         username = login_utils.current_user.name,
@@ -154,7 +154,7 @@ def test_download(filename: str):
     if filename.startswith(login_utils.current_user.name): 
         return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
     else: return j2_env.get_template('error.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         error_message = 'INVALID ACCESS'
     )
@@ -162,7 +162,7 @@ def test_download(filename: str):
 @app.route('/error', methods=['GET'])
 def test_error(): 
     return j2_env.get_template('error.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#003371',
         sections = ['article', 'form', 'auth', 'files', 'error'], 
         error_message = 'THIS IS ERROR PAGE'
     )

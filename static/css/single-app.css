@@ -1,5 +1,9 @@
+body{
+    background: white;
+}
+
 #main {
-    margin: 7em auto
+    margin: 7em auto;
 }
 
 #main > h1 {
