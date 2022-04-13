@@ -1,7 +1,8 @@
 import os, dotenv, datetime
 
-from flask import Flask, request, redirect, send_file, send_from_directory
+from flask import Flask, request, redirect, send_from_directory
 from jinja2 import Environment, FileSystemLoader
+from flask_wtf import CSRFProtect
 
 from src.auth import utils as login_utils
 from src.sqlalchemy import utils as db_utils
@@ -17,8 +18,10 @@ app.app_context().push()
 app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
-app.config['SECRET_KEY'] = "test" #str(os.urandom(24))
+app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 # database initialise
 db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
