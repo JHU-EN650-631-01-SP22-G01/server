@@ -41,7 +41,7 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
         theme_colour = 'black',
-        sections = ['article', 'form', 'auth', 'files', 'error', "a2"], 
+        sections = ['article', 'form', 'auth', 'files', 'error'], 
         department_name = 'this new department'
     )
 
