@@ -34,7 +34,7 @@
         <h1>{{ section_name.upper() }}</h1>
         <div class="form-container">
         <form action="{{ submit_to }}" method="post">
-        {{ form.csrf_token }}
+        {{ form.hidden_tag() }}
         {% for field in form %} {{ field() }} {% endfor %}
         </form>
         </div>
