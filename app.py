@@ -40,9 +40,9 @@ j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        theme_colour = '#003371',
-        sections = ['article', 'form', 'auth', 'files', 'error'], 
-        department_name = 'this department'
+        theme_colour = 'black',
+        sections = ['article', 'form', 'auth', 'files', 'error', "a2"], 
+        department_name = 'this new department'
     )
 
 @app.route('/article', methods=['GET'])
@@ -72,7 +72,9 @@ def test_form():
 
 @app.route('/posted', methods=['GET', 'POST'])
 def test_posted(): 
+    request.inputField()
     search_form = SearchForm()
+    sql = f"SELECT password_hash FROM database WHERE username = {search_form.input.data}"
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = '#003371',
@@ -80,7 +82,7 @@ def test_posted():
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
         subsections = {
-            'your posted code is ': search_form.input.data, 
+            'your posted code is ': sql, 
         }
     )
 
