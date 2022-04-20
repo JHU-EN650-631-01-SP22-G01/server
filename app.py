@@ -1,11 +1,10 @@
 import os, dotenv, datetime
 import sqlite3 as sql
 
-from flask import Flask, request, redirect, send_file, send_from_directory, render_template, jsonify, g
+from flask import Flask, request, send_from_directory, jsonify, g
 from jinja2 import Environment, FileSystemLoader
 
 from src.auth import utils as login_utils
-from src.sqlalchemy import utils as db_utils
 from src.forms import LoginForm, SearchForm
 
 # Set environment variables for APIs
@@ -21,9 +20,6 @@ app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 
-# database initialise
-db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
-db_manager.create_all()
 
 # login manager initialise
 login_manager = login_utils.init_manager(app)
