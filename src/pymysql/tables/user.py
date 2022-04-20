@@ -25,14 +25,10 @@ class UserStmts(AbsSqlStmtHolder):
     @property
     def insert_new_user(self) -> str: return """
         INSERT INTO main.User(
-            first_name, second_name, 
             account_name, password_hash, 
-            phone_num, email_address
         )
         VALUE (
-            %(first_name)s, %(second_name)s, 
             %(account_name)s, %(password_hash)s, 
-            %(phone_num)s, %(email_address)s
         )
     """
 
@@ -67,18 +63,10 @@ class UserTable(AbsTableHandler):
         if not isinstance(holder, UserStmts): raise TypeError("IMPOSSIBLE")
         return holder
 
-    def register(
-            self, first_name: str, second_name: str,
-            account_name: str, password: str,
-            phone_num: str, email_address: str
-    ) -> bool:
+    def register(self, account_name: str, password: str) -> bool:
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
         insrt_stmt = self._stmts_holder.insert_new_user
-        insrt_pars = {
-            'first_name': first_name, 'second_name': second_name,
-            'account_name': account_name, 'password_hash': password_hash,
-            'phone_num': phone_num, 'email_address': email_address
-        }
+        insrt_pars = {'account_name': account_name, 'password_hash': password_hash}
         try:
             cursor = self._db_connection.cursor()
             cursor.execute(insrt_stmt, insrt_pars)

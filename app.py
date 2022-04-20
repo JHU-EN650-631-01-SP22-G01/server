@@ -25,7 +25,6 @@ csrf.init_app(app)
 
 # database initialise
 db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
-db_manager.create_all()
 
 # login manager initialise
 login_manager = login_utils.init_manager(app)

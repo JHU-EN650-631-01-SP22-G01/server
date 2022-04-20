@@ -28,7 +28,7 @@ def init_dbmanager(
     return db_manager
 
 
-def is_correct(username: str, password: str) -> Optional[UserDbModel]: 
+def is_correct(username: str, password: str) -> bool: 
     user:UserDbModel = UserDbModel.find(by_uname=username)
     return user is not None and user.validate_password(password)
     
