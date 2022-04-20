@@ -5,6 +5,25 @@
     <title>{{ section_name }}</title>
     <link rel="stylesheet" href="/static/css/default.css" >
     <link rel="stylesheet" href="/static/css/single-app.css" >
+    <script src="/static/js/sweetalert2.all.min.js"></script>
+    
+    <script>
+        function show_notification(){
+            Swal.fire({
+                icon: 'warning', 
+                html: 'ALL EXPERIENCES RECORDS ARE <br/><strong style="color:red">CONFIDENTIAL</strong><br/>' + 
+                'ACCESS BY UNAUTHORIZED PERSONNEL IS STRICTLY PROHIBITED PERPETRATORS WILL BE TRACKED, LOCATED, AND DETAINED".', 
+                showClass: {popup: 'animate__animated animate__fadeInDown'},
+                hideClass: {popup: 'animate__animated animate__fadeOutUp'}
+            }).then((result) => 
+                Swal.fire({
+                    icon: 'info', 
+                    text: 'The system support advanced format of searching. Specificially, the searching txt can be json format like '+
+                    '{"id": "BKIGIDWQB-BHUAD-DBKBDAD", "type": "TOP SECRET", "created_time": 321412312}'
+                })
+            )
+        }
+    </script>
     <style type="text/css">
       .post-title, a.active, pre, hr { background: {{ theme_colour }}; }
       a,a:visited { color: {{ theme_colour }}; }
@@ -14,7 +33,11 @@
     </style>
 </head>
 
-<body>
+<body 
+{% if section_name == "records" %} 
+    onload="show_notification()"
+{% endif %}
+>
     <header role="banner">
         <nav role="navigation">
             <ul>

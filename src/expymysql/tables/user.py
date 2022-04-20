@@ -1,6 +1,7 @@
 import hashlib
+from typing import Dict
 from pymysql import Connection
-from pymysql.cursors import Cursor
+from pymysql.cursors import Cursor, DictCursor
 
 from .abs_table import AbsTableHandler, AbsSqlStmtHolder
 
@@ -9,25 +10,50 @@ class UserStmts(AbsSqlStmtHolder):
 
     @property
     def create_db(self) -> str: return """
-        create table IF NOT EXISTS main.User (
+        create table IF NOT EXISTS G01.User (
             id              int auto_increment                  primary key,
-            account_name    varchar(128)                        not null,
+            username    varchar(128)                        not null,
             password_hash   varchar(128)                        not null,
             last_login_time timestamp default CURRENT_TIMESTAMP not null,
-            constraint      User_account_name_uindex            unique (account_name)
+            constraint      User_username_uindex            unique (username)
         );
     """
 
     @property
     def insert_new_user(self) -> str: return """
-        INSERT INTO main.User(account_name, password_hash)
-        VALUE (%(account_name)s, %(password_hash)s)
+        INSERT INTO G01.User(username, password_hash)
+        VALUE (%(username)s, %(password_hash)s)
+    """
+
+    @property
+    def select_user_by_id(self) -> str: return """
+        SELECT id, username FROM G01.User
+        WHERE id = %(id)s
+    """
+    
+    @property
+    def select_user_by_username(self) -> str: return """
+        SELECT id, username FROM G01.User
+        WHERE username = %(username)s
+    """
+
+    @property
+    def whether_is_empty(self) -> str: return """
+        SELECT 1 FROM G01.User
+        LIMIT 1
+    """
+
+    @property
+    def whether_username_exist(self) -> str: return """
+        SELECT 1 FROM G01.User
+        WHERE username = %(username)s
+        LIMIT 1
     """
 
     @property
     def whether_username_match_password(self) -> str: return """
-        SELECT 1 FROM main.User
-        WHERE account_name = %(account_name)s 
+        SELECT 1 FROM G01.User
+        WHERE username = %(username)s 
             AND password_hash = %(password_hash)s
         LIMIT 1
     """
@@ -44,21 +70,41 @@ class UserTable(AbsTableHandler):
         if not isinstance(holder, UserStmts): raise TypeError("IMPOSSIBLE")
         return holder
 
-    def register(self, account_name: str, password: str) -> None:
+    def register(self, username: str, password: str) -> None:
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(
                 query=self._stmts.insert_new_user, 
-                args={'account_name': account_name, 'password_hash': password_hash}
+                args={'username': username, 'password_hash': password_hash}
             )
         self._db_connection.commit()
         return None
 
-    def is_correct_password(self, account_name: str, password: str) -> bool:
+    def get_user_by_id(self, id: int) -> Dict: 
+        with self._db_connection.cursor(DictCursor) as cursor:
+            cursor.execute(self._stmts.select_user_by_id, {"id": id})
+            return cursor.fetchone()
+    
+    def get_user_by_username(self, username: int) -> Dict: 
+        with self._db_connection.cursor(DictCursor) as cursor:
+            cursor.execute(self._stmts.select_user_by_username, {"username": username})
+            return cursor.fetchone()
+    
+    def contains(self, username: str) -> bool: 
+        with self._db_connection.cursor(Cursor) as cursor: 
+            cursor.execute(self._stmts.whether_username_exist, args={'username': username})
+            return cursor.fetchone() is not None
+    
+    def is_empty(self) -> bool: 
+        with self._db_connection.cursor(Cursor) as cursor: 
+            cursor.execute(self._stmts.whether_is_empty)
+            return cursor.fetchone() is not None
+
+    def is_correct_password(self, username: str, password: str) -> bool:
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(
                 query=self._stmts.whether_username_match_password, 
-                args={'account_name': account_name, 'password_hash': password_hash}
+                args={'username': username, 'password_hash': password_hash}
             )
             return cursor.fetchone() is not None

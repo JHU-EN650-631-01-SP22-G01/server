@@ -1,4 +1,5 @@
-import os, dotenv, datetime
+from logging import exception
+import os, dotenv, datetime, json
 
 from typing import List
 
@@ -8,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 from flask_wtf import CSRFProtect
 
 from src.auth import utils as login_utils
-from src.sqlalchemy import utils as db_utils
+from src.expymysql import utils as db_utils
 from src.forms import LoginForm, SearchForm
 
 # Set environment variables for APIs
@@ -27,8 +28,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 # database initialise
-db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
-
+db_tables = db_utils.init_dbmanager(app, init_users_json='[{"username": "root", "password":"123456789"}]')
 
 # login manager initialise
 login_manager = login_utils.init_manager(app, login_route='/login')
@@ -92,7 +92,7 @@ def login():
             sections = get_section(login_utils.current_user), 
             error_message = 'INCORRECT PASSWORD OR USERNAME'
         )
-    user_session = login_utils.UserSession(login_form.username.data)
+    user_session = login_utils.load_user_by_name(login_form.username.data)
     login_utils.login_user(user_session)
     return j2_env.get_template('notify.jinja').render(
         theme_colour = '#A6CDE7',
@@ -114,16 +114,9 @@ def logout_user():
 
 @app.route('/records', methods=['GET', 'POST'])
 @login_required
-def test_form(): 
+def records(): 
     search_form = SearchForm()
-    if request.method == 'POST': 
-        return j2_env.get_template('notify.jinja').render(
-            theme_colour = '#A6CDE7',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'records', 
-            notification = search_form.input.data
-        )
-    else:
+    if request.method == 'GET': 
         search_form.input.render_kw = {"placeholder": "Search for experiments records"}
         return j2_env.get_template('section_basic_form.jinja').render(
             theme_colour = '#A6CDE7',
@@ -132,10 +125,38 @@ def test_form():
             form = search_form,
             submit_to = '/records'
         ) 
-
+    json_data = []
+    try: json_data.extend(json.loads(search_form.input.data))
+    except ValueError:json_data.append({'id': search_form.input.data})
+    query_result = []
+    try: 
+        if 'id' in json_data : 
+            out = db_tables.records.get_record_by_id(int(json_data['id']))
+            if 'type' not in json_data or out['type'] == json_data['type']: query_result.append(out)
+        elif 'type' in json_data: 
+            print(f'DATA IS {json_data}')
+            out = db_tables.records.get_records_by_type(json_data['type'])
+            query_result.extend(out)
+        else: 
+            raise AttributeError('UNSUPPORT QUERY')
+        return j2_env.get_template('section_filesystem.jinja').render(
+            theme_colour = '#A6CDE7',
+            sections = get_section(login_utils.current_user), 
+            section_name = 'records',
+            query_str = json_data,
+            query_result = query_result
+        )
+    except Exception as e: 
+        return j2_env.get_template('error.jinja').render(
+            theme_colour = '#A6CDE7',
+            sections = get_section(login_utils.current_user), 
+            section_name = 'records', 
+            error = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}'
+        )
+    
 @app.route('/files', methods=['GET'])
 @login_utils.login_required
-def test_filesystem():
+def filesystem():
     def make_tree(path):
         tree = dict(name=os.path.basename(path), children=[])
         try: 
