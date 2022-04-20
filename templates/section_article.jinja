@@ -20,7 +20,7 @@
                 <li><a href="/">MAIN</a></li>
                 {% for name in sections %}
                 <li> <a href="{{ name.lower() }}" 
-                {% if name.lower()==section_name.lower() %} 
+                {% if name.lower() == section_name.lower() %} 
                     class='active' 
                 {% endif %}> {{ name.upper() }} </a></li>
                 {% endfor %}

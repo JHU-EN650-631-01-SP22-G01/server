@@ -1,6 +1,5 @@
 from flask import Flask
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
-
+from flask_login import LoginManager, logout_user, login_required, login_user, logout_user, current_user
 from .user import UserSession
 
 login_manager = LoginManager()
