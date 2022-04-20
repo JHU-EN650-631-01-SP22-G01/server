@@ -24,7 +24,7 @@ def init_dbmanager(
             new_user = UserDbModel(id=uuid.uuid4().hex, username=data['username'])
             new_user.set_password(data['password'])
             db_manager.session.add(new_user)
-        db_manager.session.commit()
+            db_manager.session.commit()
     return db_manager
 
 

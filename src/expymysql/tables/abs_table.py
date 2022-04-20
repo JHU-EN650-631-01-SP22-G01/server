@@ -1,8 +1,7 @@
 import abc
 from typing import Any
-
+from pymysql.cursors import Cursor
 from pymysql import Connection
-
 
 class AbsSqlStmtHolder(object):
     __metaclass__ = abc.ABCMeta
@@ -17,13 +16,14 @@ class AbsTableHandler(object):
 
     def __init__(self, connection: Connection, stmts: AbsSqlStmtHolder):
         with connection.cursor() as cursor:
+            cursor: Cursor
             cursor.execute(stmts.create_db)
             connection.commit()
         self.__db_stmts = stmts
         self.__db_connection = connection
 
     @property
-    def _stmts_holder(self) -> AbsSqlStmtHolder:
+    def _stmts(self) -> AbsSqlStmtHolder:
         return self.__db_stmts
 
     @property

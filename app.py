@@ -31,8 +31,7 @@ db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "pass
 
 
 # login manager initialise
-login_manager = login_utils.init_manager(app)
-login_manager.login_view = '/login'
+login_manager = login_utils.init_manager(app, login_route='/login')
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)

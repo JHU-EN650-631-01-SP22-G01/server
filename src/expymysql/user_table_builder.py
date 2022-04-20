@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional
 from .tables.user import UserTable
-import pymysql
+import expymysql
 
 class UserTableBuilder(object):
 
@@ -28,9 +28,9 @@ class UserTableBuilder(object):
         return self
 
     def build(self) -> UserTable: 
-        main_connection = pymysql.connect(
+        main_connection = expymysql.connect(
             host=self.__host, port=self.__port, 
             user=self.__username, password=self.__password,
-            cursorclass=pymysql.cursors.DictCursor
+            cursorclass=expymysql.cursors.DictCursor
         )
         return UserTable(main_connection)
