@@ -72,9 +72,7 @@ def test_form():
 
 @app.route('/posted', methods=['GET', 'POST'])
 def test_posted(): 
-    request.inputField()
     search_form = SearchForm()
-    sql = f"SELECT password_hash FROM database WHERE username = {search_form.input.data}"
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
@@ -82,7 +80,7 @@ def test_posted():
         section_name = 'AFTER POST', 
         date_time = 'ANY TIME', 
         subsections = {
-            'your posted code is ': sql, 
+            'your posted code is ': search_form.input.data, 
         }
     )
 

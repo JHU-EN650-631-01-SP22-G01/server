@@ -33,7 +33,7 @@
         <time class="date">{{ date_time }}</time>
         {% for title, content in subsections.items() %}
             <h2>{{ title }}</h2>
-            <p> {{ content }} </p>
+            <p> {{ content | escape }} </p>
         {% endfor %}
     </main>
     <hr />
