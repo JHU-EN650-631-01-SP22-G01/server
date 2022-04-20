@@ -20,6 +20,7 @@ def init_dbmanager(
         db_manager.create_all()
         if init_json is None: return db_manager
         for data in json.loads(init_json): 
+            print(data)
             if UserDbModel.find(by_uname=data['username']) is not None: continue
             new_user = UserDbModel(id=uuid.uuid4().hex, username=data['username'])
             new_user.set_password(data['password'])
