@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Optional
 from flask_login import UserMixin
-from ..sqlalchemy import UserDbModel
 
 
 class UserSession(UserMixin):

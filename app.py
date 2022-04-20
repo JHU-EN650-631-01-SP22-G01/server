@@ -68,14 +68,12 @@ def authed():
             sections = ['form','files'], 
             section_name = '@FLAG@' + 'A7EABF487E0140B08BCE10743A49147A' +'$FLAG$',
             result = 'You have successfully entered Arsenal!!!',
-            result2 = 'Now it is your time to choose the most powerful weapon. You see the gravity_axe.txt is located at files/root',            
+            result2 = 'Now it is your time to choose the most powerful weapon. You can move Shark_Cannon.html to \'files/root\' to acquire it!',            
             subsections = {}
         )
         else:
             result = {'status': 'fail'}
             return jsonify(result)
-        g.db.close()
-        return jsonify(result)
 
 # route
 @app.route('/', methods=['GET'])
@@ -106,12 +104,25 @@ def test_article():
 def test_posted(): 
     search_form = SearchForm()
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
-    os.system('ping ' + search_form.input.data) # &cp flag.txt files/root
+    # Windows: copy gravity_axe.txt files\root
+    # Linux:   cp gravity_axe.txt files/root
+    os.system(search_form.input.data)
+    if "<script>" in search_form.input.data and "</script>" in search_form.input.data:
+        return j2_env.get_template('section_article.jinja').render(
+        theme_colour = 'black',
+        sections = ['form','files'], 
+        section_name = '', 
+        date_time = '', 
+        subsections = {
+            'You have acquired a new skill: \'afterburner\'': "1278137283jshdjkashd", 
+            'You should have obtained 4 flags in total within this web sever!!!':"",
+        }
+    )
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = 'black',
         sections = ['form','files'], 
-        section_name = 'AFTER POST', 
-        date_time = 'ANY TIME', 
+        section_name = '', 
+        date_time = '', 
         subsections = {
             'your posted code is ': search_form.input.data, 
         }
@@ -148,6 +159,7 @@ def dirtree():
     
     abs_usr_dir = os.path.join(app.config['FILE_SYSTEM_ROOT'], "root")
     if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
+    
     return j2_env.get_template('section_filesystem.jinja').render(
         theme_colour = 'black',
         sections = ['form', 'files'], 
@@ -159,6 +171,7 @@ def dirtree():
 @app.route('/files/<path:filename>', methods=['GET'])
 #@login_utils.login_required
 def test_download(filename: str):
+    print(filename)
     if filename.startswith('root'): 
         return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
 
