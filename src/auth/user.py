@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-from flask_login import UserMixin
+from flask_login import AnonymousUserMixin
 from ..sqlalchemy import UserDbModel
 
 
@@ -32,4 +32,5 @@ class UserSession(UserMixin):
     @classmethod
     def get(cls, by_uid: str) -> UserSession: 
         db_user = UserDbModel.find(by_uid=by_uid)
+        if db_user is None: AnonymousUserMixin()
         return UserSession(db_user.username, db_user)
