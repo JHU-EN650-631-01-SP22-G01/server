@@ -12,7 +12,7 @@ class UserStmts(AbsSqlStmtHolder):
     def create_db(self) -> str: return """
         create table IF NOT EXISTS G01.User (
             id              int auto_increment                  primary key,
-            username    varchar(128)                        not null,
+            username        varchar(128)                        not null,
             password_hash   varchar(128)                        not null,
             last_login_time timestamp default CURRENT_TIMESTAMP not null,
             constraint      User_username_uindex            unique (username)

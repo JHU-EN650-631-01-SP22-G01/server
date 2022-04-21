@@ -147,7 +147,7 @@ def records():
             theme_colour = '#082567',
             sections = get_section(login_utils.current_user), 
             section_name = 'records', 
-            error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}, </br> ERROR: {e}'
+            error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}, </br> ERROR: {e} </br> RESULT: {query_result}'
         )
     return j2_env.get_template('section_list.jinja').render(
         theme_colour = '#082567',
@@ -179,7 +179,6 @@ def access_record(id: str):
             'SECURITY CLEARNANCE': record['type'] 
         }
     )
-
 
 @app.route('/files', methods=['GET'])
 @login_utils.login_required

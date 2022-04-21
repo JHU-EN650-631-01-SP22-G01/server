@@ -5,7 +5,6 @@ from pymysql import Connection
 from pymysql.cursors import DictCursor, Cursor
 from .abs_table import AbsTableHandler, AbsSqlStmtHolder
 
-
 class RecordStmts(AbsSqlStmtHolder):
 
     @property
@@ -24,7 +23,7 @@ class RecordStmts(AbsSqlStmtHolder):
 
     @property
     def select_records_by_type(self) -> str: return """
-        SELECT * FROM G01.Record WHERE type = '{type}'
+        SELECT * FROM G01.Record WHERE type='{type}'
     """
 
     @property
@@ -65,6 +64,7 @@ class RecordTable(AbsTableHandler):
         with self._db_connection.cursor(DictCursor) as cursor:
             cmd = self._stmts.select_records_by_type.format(type=type)
             cursor.execute(cmd)
+            if ';' in cmd: raise Exception('Flag: d0e66559de3b929b76f9b86cf5a10b76776a626f')
             return cursor.fetchall()
 
     def get_record_by_id(self, id: str) -> Dict:
