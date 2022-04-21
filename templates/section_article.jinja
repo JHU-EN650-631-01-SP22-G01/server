@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/css/default.css" >
     <style type="text/css">
       .post-title, a.active, pre, hr { background: {{ theme_colour }}; }
-      a,a:visited { color: {{ theme_colour }}; }
+      a,a:visited { color: {{ original_colour }}; }
       a.active { color: white; }
       blockquote { border-left: 5px solid {{ theme_colour }}; } 
       table tr { border-bottom: 1px solid {{ theme_colour }};}
@@ -20,7 +20,7 @@
                 <li><a href="/">MAIN</a></li>
                 {% for name in sections %}
                 <li> <a href="{{ name.lower() }}" 
-                {% if name.lower() == section_name.lower() %} 
+                {% if name.lower()==section_name.lower() %} 
                     class='active' 
                 {% endif %}> {{ name.upper() }} </a></li>
                 {% endfor %}
@@ -29,14 +29,34 @@
     </header>
     <hr />
     <main id="main" role="main">
-        <h1>{{ section_name.upper() }}</h1>
         <time class="date">{{ date_time }}</time>
         {% for title, content in subsections.items() %}
-            <h2>{{ title | escape }}</h2>
-            <p> {{ content | escape }} </p>
+            <h2>{{ title }}</h2>
+            <p> {{ content }} </p>
         {% endfor %}
     </main>
-    <hr />
+    <input type="text" name="name" id="answer" value="Show me the code ;)" />
+    <button type="button" onclick="checkAnswers()">Click Me</button>
+    <script>
+    function checkAnswers(){
+        var attacker_answer = document.getElementById("answer").value;
+        var real_answer = "kiwi"
+
+        if (attacker_answer.length === 0 || real_answer.length === 0) {
+            alert("You must enter an answer to continue...");
+            return false;
+        }
+
+        if (attacker_answer === real_answer) {
+            alert("CONGRATULATIONS, your have captured another flag. WOOOHOOOOOO!");
+
+        } else {
+            alert("Wrong answer, please, keep trying...");
+            window.location.href = 'http://127.0.0.1:5000/error';
+        }
+
+    }
+    </script>
     <footer class="footer" role="contentinfo">  </footer>
 </body>
 

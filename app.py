@@ -1,16 +1,14 @@
-import os, dotenv, datetime, json
+import os, dotenv, datetime
 
-from typing import List
-from subprocess import check_output
-
-from flask import Flask, request, redirect, send_from_directory
-from flask_login import UserMixin, login_required
+from flask import Flask, request, redirect, send_file, send_from_directory
 from jinja2 import Environment, FileSystemLoader
-from flask_wtf import CSRFProtect
 
 from src.auth import utils as login_utils
-from src.expymysql import utils as db_utils
+from src.sqlalchemy import utils as db_utils
 from src.forms import LoginForm, SearchForm
+from PIL import Image
+import binascii
+import optparse
 
 # Set environment variables for APIs
 project_root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -22,184 +20,61 @@ app.app_context().push()
 app.config['FILE_SYSTEM_ROOT'] = os.path.join(project_root_dir, 'files')
 
 # secret key
-app.config['SECRET_KEY'] = "test" #str(os.urandom(24))
+app.config['SECRET_KEY'] = str(os.urandom(24))
 app.permanent_session_lifetime = datetime.timedelta(minutes=30)
-csrf = CSRFProtect()
-csrf.init_app(app)
 
 # database initialise
-db_tables = db_utils.init_dbmanager(app, 
-    init_users_json='[{"username": "root", "password":"123456789"}]', 
-    init_records_json= '[{"type": "TOP SECRET"}, {"type": "SECRET"}, {"type": "SECRET"}, {"type": "CONFIDENTIALITY"}, {"type": "NORMAL"}]'
-)
+db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "root", "password":"123456789"}]')
+db_manager.create_all()
 
 # login manager initialise
-login_manager = login_utils.init_manager(app, login_route='/login')
+login_manager = login_utils.init_manager(app)
+login_manager.login_view = '/user'
 
 # CORS to allow the cross-domain issues
 # CORS(app, supports_credentials=True)
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 
-def get_section(by_user: UserMixin)-> List[str]:
-    if by_user.is_authenticated: return ['records', 'files', 'logout']
-    else: return ['articles', 'login'] 
-
 # route
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        theme_colour = '#A6CDE7',
-        sections = get_section(login_utils.current_user), 
-        department_name = 'large mecha'
+        theme_colour = 'darkgreen',
+        original_colour = 'black',
+        department_name = 'Spiritual Force',
+        sections = ['puzzle', 'error'],
+
     )
 
-@app.route('/articles', methods=['GET'])
-def articles(): 
+@app.route('/puzzle', methods=['GET'])
+def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = '#A6CDE7',
-        sections = get_section(login_utils.current_user), 
-        section_name = 'DEPARTMENTS STATUS', 
-        date_time = '', 
+        theme_colour = 'darkgreen',
+        original_colour = 'black',
+        sections = ['puzzle', 'error'], 
+        section_name = 'puzzle', 
+        date_time = 'Thu, Apr 20th, 2023', 
         subsections = {
-            'LARGE MECHA': '... WORKING', 
-            'BIOLOGY DEP': '... WORKING', 
-            'ARERNAL DEP': '... WORKING', 
-            'SOMETH ELSE': '... WORKING', 
+            'story premise': 'Regardless of the programming language being used, the functionality, logic, and efficiency of the language are always paramount — unless, of course, some programming language that champions purposefully overcomplicated code and was created for hurt your brain. [hint: The appearance of beginning does not mean the real beginning.]',
+            'now your turn': '-----[------->+<]>++.-----[-->+++<]>.[--->+<]>---.[-->+++++<]>-.--[--->+<]>---.-----------.[->+++<]>--.-.---[->+++<]>.+++[->++++<]>.-------.--[--->+<]>-.[---->+<]>+++.-[--->++<]>+.--.+++++.----------.-[--->+<]>-.+++++[->+++<]>.---------.[--->+<]>--.---[->++++<]>-.+.+.++[->+++<]>+..[--->+<]>--.+[->+++<]>.--.+++++++++++++.-[->+++++<]>-.[->+++<]>++.+++.--[--->+<]>-.+[->+++<]>++.----.--[--->+<]>-.+++[->+++<]>.+++++++++.[----->++<]>.------------.+[->+++<]>.++++++++++++.--..++++++++.-------.-----.------.--.--[--->+<]>-.+++[->+++<]>.-.-[--->+<]>-.[->+++<]>+.+++++++++++++.----------.-[--->+<]>-.--[->++++<]>-.-[->+++<]>-.--[--->+<]>-.++[->+++<]>+.+++++.---.-.-[--->++<]>---.', 
         }
+
     )
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if login_utils.current_user.is_authenticated: return redirect('/logout')
-    if request.method == 'GET': 
-        return j2_env.get_template('section_basic_form.jinja').render(
-            theme_colour = '#A6CDE7',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'login', 
-            date_time = 'ANY TIME', 
-            form = LoginForm(),
-            submit_to = '/login'
-        )
-    login_form = LoginForm()
-    if not login_form.validate_on_submit(): 
-        return j2_env.get_template('error.jinja').render(
-            theme_colour = '#A6CDE7',
-            section_name = 'login', 
-            sections = get_section(login_utils.current_user), 
-            error_message = 'NOT VALID ON SUBMIT', 
-        )
-    if not db_utils.is_correct(login_form.username.data, login_form.password.data): 
-        return j2_env.get_template('error.jinja').render(
-            theme_colour = '#A6CDE7',
-            section_name = 'login', 
-            sections = get_section(login_utils.current_user), 
-            error_message = 'INCORRECT PASSWORD OR USERNAME'
-        )
-    user_session = login_utils.load_user_by_name(login_form.username.data)
-    login_utils.login_user(user_session)
-    return j2_env.get_template('notify.jinja').render(
-        theme_colour = '#A6CDE7',
-        section_name = 'login', 
-        sections = get_section(login_utils.current_user), 
-        notification = 'LOGIN SUCCESS'
+@app.route('/error', methods=['GET'])
+def test_error(): 
+    return j2_env.get_template('error.jinja').render(
+        theme_colour = 'darkgreen',
+        original_colour = 'black',
+        sections = ['puzzle', 'error'], 
+        section_call = 'error', 
+        error_message = 'THIS IS ERROR PAGE'
     )
 
-@app.route('/logout', methods=['GET'])
-@login_utils.login_required
-def logout_user(): 
-    login_utils.logout_user()
-    return j2_env.get_template('notify.jinja').render(
-        theme_colour = '#A6CDE7',
-        section_name = 'logout', 
-        sections = get_section(login_utils.current_user), 
-        notification = 'LOGOUT SUCCESS'
-    )
-
-@app.route('/records', methods=['GET', 'POST'])
-@login_required
-def records(): 
-    search_form = SearchForm()
-    if request.method == 'GET': 
-        search_form.input.render_kw = {"placeholder": "Search for experiments records"}
-        return j2_env.get_template('section_basic_form.jinja').render(
-            theme_colour = '#A6CDE7',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'records', 
-            form = search_form,
-            submit_to = '/records'
-        ) 
-    json_data = {}
-    try: json_data.update(json.loads(search_form.input.data))
-    except (ValueError,  TypeError):json_data.update({'id': search_form.input.data}) 
-    query_result = []
-    try: 
-        if 'id' in json_data : 
-            out = db_tables.records.get_record_by_id(json_data['id'])
-            if 'type' not in json_data or out['type'] == json_data['type']: query_result.append(out)
-        elif 'type' in json_data: 
-            print(f'DATA IS {json_data}')
-            out = db_tables.records.get_records_by_type(json_data['type'])
-            query_result.extend(out)
-        else: 
-            raise AttributeError('UNSUPPORT QUERY')
-        return j2_env.get_template('section_records.jinja').render(
-            theme_colour = '#A6CDE7',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'records',
-            query_str = json_data,
-            query_result = query_result
-        )
-    except Exception as e: 
-        return j2_env.get_template('error.jinja').render(
-            theme_colour = '#A6CDE7',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'records', 
-            error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}</br>ERROR: {e}'
-        )
-    
-@app.route('/records/<path:rid>', methods=['GET'])
-@login_required
-def access_record(rid: str):
-    record = db_tables.records.get_record_by_id(rid)
-    return j2_env.get_template('section_article.jinja').render(
-        theme_colour = '#A6CDE7',
-        sections = get_section(login_utils.current_user), 
-        section_name = 'experiment record', 
-        date_time = record['created_time'], 
-        subsections = {
-            'RECORD ID': record['id'],
-            'SECURITY CLEARNANCE': record['type']
-        }
-    )
-    
-@app.route('/files', methods=['GET'])
-@login_utils.login_required
-def filesystem():
-    abs_usr_dir = app.config['FILE_SYSTEM_ROOT']
-    cmds = '/bin/ls /home/yxu/Projects/ctf@eh/server/files'
-    output = check_output(cmds, shell=True).decode()
-    return j2_env.get_template('section_article.jinja').render(
-        theme_colour = '#A6CDE7',
-        sections = get_section(login_utils.current_user), 
-        section_name = 'files',
-        subsections = {
-            "DATA": str(output), 
-            "CMDS": str(cmds)
-        }
-    )
-
-@app.route('/files/<path:filename>', methods=['GET'])
-@login_utils.login_required
-def test_download(filename: str):
-    if filename.startswith(login_utils.current_user.name): 
-        return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
-    else: return j2_env.get_template('error.jinja').render(
-        theme_colour = '#A6CDE7',
-        sections = ['article', 'form', 'auth', 'files', 'error'], 
-        error_message = 'INVALID ACCESS'
-    )
-
+@app.route('/exception', methods=['GET'])
+def test_exception(): 
+    raise Exception("SOMETHING")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = True)

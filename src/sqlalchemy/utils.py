@@ -24,11 +24,11 @@ def init_dbmanager(
             new_user = UserDbModel(id=uuid.uuid4().hex, username=data['username'])
             new_user.set_password(data['password'])
             db_manager.session.add(new_user)
-            db_manager.session.commit()
+        db_manager.session.commit()
     return db_manager
 
 
-def is_correct(username: str, password: str) -> bool: 
+def is_correct(username: str, password: str) -> Optional[UserDbModel]: 
     user:UserDbModel = UserDbModel.find(by_uname=username)
     return user is not None and user.validate_password(password)
     

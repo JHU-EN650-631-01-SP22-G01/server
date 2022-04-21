@@ -1,37 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="en">  
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ department_name }} main page</title>
     <meta property="og:title" content="Index" />
-    <link rel="stylesheet" href="/static/css/default.css" >
+    <link rel="stylesheet" href="/static/css/default.css" style type="text/css" >
     <style type="text/css">
       .post-title, a.active, pre, hr { background: {{ theme_colour }}; }
-      a,a:visited { color: {{ theme_colour }}; }
+      a,a:visited { color: {{ original_colour }}; }
       a.active { color: white; }
       blockquote { border-left: 5px solid {{ theme_colour }}; } 
       table tr { border-bottom: 1px solid {{ theme_colour }};}
+      body {
+        background-image: url("/static/img/green.jpg"), url("/static/img/leaves.jpg"), url("/static/img/blue.jpeg");
+        background-repeat: no-repeat repeat;
+        background-position: left bottom, center, right top;
+      }
     </style>
-  </head>
+    <h1 class="post-title">{{department_name.upper()}}</h1>
+</head>
 
   <body>
-    <header role="banner">
-      <nav role="navigation">
-        <ul>
-        <li><a href="/" class="active"> MAIN </a> </li>
-        {% for name in sections %}
-          <li><a href="{{ name }}">  {{ name.upper() }} </a></li>
-        {% endfor %}
-        </ul>
-      </nav>
-    </header>
-    <hr />
-    <main id="main" role="main">
-        <h1 class="post-title">{{ department_name.upper() }}</h1>
-    </main>
-    <hr />
+    <nav role="navigation">  
+      <br>
+      <br>
+      <br>
+      <br>
+      <a href="/" class="active"> MAIN </a>
+      {% for name in sections %}
+      <a href="{{ name }}" class="separate">  {{ name.upper() }} </a>
+      {% endfor %}
+    </nav>
     <footer class="footer" role="contentinfo"></footer>
   </body>
 
-</html>

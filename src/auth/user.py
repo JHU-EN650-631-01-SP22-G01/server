@@ -1,14 +1,13 @@
 from __future__ import annotations
+from typing import Optional
 from flask_login import UserMixin
-from ..expymysql import utils as db_utils
+from ..sqlalchemy import UserDbModel
 
 
 class UserSession(UserMixin):
 
-    def __init__(self, id: str, username: str):
-        self.__id = id
-        self.__username = username
-
+    def __init__(self, uname: str, db_user: Optional[UserDbModel]=None):
+        self.__db_user= db_user if db_user is not None else UserDbModel.find(by_uname=uname)
     
     def is_authenticated(self):
         return True
@@ -20,18 +19,17 @@ class UserSession(UserMixin):
         return True
 
     def get_id(self) -> str:
-        return self.__id
+        return self.__db_user.id
+
+    @property
+    def db_orc(self) -> UserDbModel: 
+        return self.__db_user
     
     @property
     def name(self) -> str: 
-        return self.__username
+        return self.__db_user.username
 
     @classmethod
-    def get_by_id(cls, id: str) -> UserSession: 
-        db_user = db_utils.tables.users.get_user_by_id(id)
-        return UserSession(**db_user)
-
-    @classmethod 
-    def get_by_username(cls, username: str) -> UserSession: 
-        db_user = db_utils.tables.users.get_user_by_username(username)
-        return UserSession(**db_user)
+    def get(cls, by_uid: str) -> UserSession: 
+        db_user = UserDbModel.find(by_uid=by_uid)
+        return UserSession(db_user.username, db_user)
