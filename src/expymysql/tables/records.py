@@ -11,7 +11,7 @@ class RecordStmts(AbsSqlStmtHolder):
     @property
     def create_db(self) -> str: return """
         create table IF NOT EXISTS G01.Record (
-            id              int auto_increment                  primary key,
+            id      varchar(128)                        primary key,
             type    varchar(128)                        not null,
             created_time timestamp default CURRENT_TIMESTAMP not null
         );
@@ -64,18 +64,17 @@ class RecordTable(AbsTableHandler):
     def get_records_by_type(self, type: str) -> Tuple[Dict]:
         with self._db_connection.cursor(DictCursor) as cursor:
             cmd = self._stmts.select_records_by_type.format(type=type)
-            print(f"SQL: \t\t\t{cmd}")
             cursor.execute(cmd)
             return cursor.fetchall()
 
-    def get_record_by_id(self, id: int) -> Dict:
+    def get_record_by_id(self, id: str) -> Dict:
         with self._db_connection.cursor(DictCursor) as cursor:
             cursor.execute(self._stmts.select_record_by_id, {"id": id})
             return cursor.fetchone()
 
     def record(self, new_val: Dict) -> None: 
         with self._db_connection.cursor(DictCursor) as cursor: 
-            cursor.execute(self._stmts.insert_record, {'id': uuid1()} | new_val)
+            cursor.execute(self._stmts.insert_record, {'id': str(uuid1())} | new_val)
         self._db_connection.commit()
         return None
 

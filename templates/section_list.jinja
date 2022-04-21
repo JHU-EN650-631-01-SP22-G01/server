@@ -34,7 +34,7 @@
         <h1>{{ query_str }}</h1>
         <ul>
         {%- for item in query_result  %}
-            <li><a href="/{{ section_name }}/{{ item.name }}">{{ item.name }}</a>
+            <li><a href="/{{ section_name }}/{{ item.id }}">{{ item.id }}</a>
         {%- endfor %}
         </ul>
     </main>

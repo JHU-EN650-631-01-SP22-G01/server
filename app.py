@@ -143,13 +143,6 @@ def records():
             query_result.extend(out)
         else: 
             raise AttributeError('UNSUPPORT QUERY')
-        return j2_env.get_template('section_list.jinja').render(
-            theme_colour = '#082567',
-            sections = get_section(login_utils.current_user), 
-            section_name = 'records',
-            query_str = json_data,
-            query_result = query_result
-        )
     except Exception as e: 
         return j2_env.get_template('error.jinja').render(
             theme_colour = '#082567',
@@ -157,7 +150,38 @@ def records():
             section_name = 'records', 
             error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}, </br> ERROR: {e}'
         )
+    return j2_env.get_template('section_list.jinja').render(
+        theme_colour = '#082567',
+        sections = get_section(login_utils.current_user), 
+        section_name = 'records',
+        query_str = json_data,
+        query_result = query_result
+    )
     
+@app.route('/records/<path:id>', methods=['GET'])
+@login_required
+def get_record(id: str): 
+    record = db_tables.records.get_record_by_id(id)
+    if record is None: 
+        return j2_env.get_template('error.jinja').render(
+            theme_colour = '#082567',
+            sections = get_section(login_utils.current_user), 
+            section_name = 'records', 
+            error_message = f'NOT EXIST ID {id}'
+        ) 
+    else: return j2_env.get_template('section_article.jinja').render(
+        theme_colour = '#082567',
+        sections = get_section(login_utils.current_user), 
+        section_name = 'records', 
+        date_time = datetime.datetime.now(), 
+        subsections = {
+            'RECORD ID': record['id'], 
+            'EXPERIMENT TIMES': record['created_time'], 
+            'SECURITY CLEARNANCE': record['type'] 
+        }
+    )
+
+
 @app.route('/files', methods=['GET'])
 @login_utils.login_required
 def filesystem():
@@ -181,7 +205,7 @@ def filesystem():
     return j2_env.get_template('section_filesystem.jinja').render(
         theme_colour = '#082567',
         sections = get_section(login_utils.current_user), 
-        section_name = f'Private directory of {login_utils.current_user.name}',
+        section_name = f'files',
         username = login_utils.current_user.name,
         tree = make_tree(abs_usr_dir)
     )
