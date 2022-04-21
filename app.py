@@ -81,7 +81,7 @@ def department_main():
     return j2_env.get_template('index.jinja').render(
         theme_colour = '#470024',
         sections = [], 
-        department_name = 'Restricted Area: NO UNAUTHORIZED PERSONNEL BEYOND THIS POINT',
+        department_name = '<strong>Restricted Area</strong> <br/>NO UNAUTHORIZED PERSONNEL BEYOND THIS POINT',
         head = 'Arsenal'
     )
 
