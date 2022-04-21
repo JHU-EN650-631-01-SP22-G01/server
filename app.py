@@ -1,12 +1,14 @@
 import os, dotenv, datetime
+from typing import List
 
-from flask import Flask, request, redirect, send_from_directory
+from flask import Flask, request, send_from_directory
+from flask_login import UserMixin
 from jinja2 import Environment, FileSystemLoader
 from flask_wtf import CSRFProtect
 
 from src.auth import utils as login_utils
 from src.sqlalchemy import utils as db_utils
-from src.forms import LoginForm, SearchForm
+from src.forms import LoginForm
 
 # Set environment variables for APIs
 project_root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -23,50 +25,33 @@ app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-# database initialise
 db_manager = db_utils.init_dbmanager(app, init_json='[{"username": "Erfan", "password":"StupidPW"}]')
-db_manager.create_all()
 
-# login manager initialise
-login_manager = login_utils.init_manager(app)
-login_manager.login_view = '/auth'
+login_manager = login_utils.init_manager(app, login_route='/auth')
 
-# CORS to allow the cross-domain issues
-# CORS(app, supports_credentials=True)
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
+
+def get_section(by_user: UserMixin)-> List[str]:
+    if by_user.is_authenticated: return ['files', 'logout']
+    else: return ['auth'] 
 
 # route
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
         theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
+        sections = get_section(login_utils.current_user),
         department_name = 'this department'
     )
 
-@app.route('/posted', methods=['GET', 'POST'])
-def test_posted(): 
-    search_form = SearchForm()
-    if not search_form.validate_on_submit(): raise Exception(search_form.errors)
-    return j2_env.get_template('section_article.jinja').render(
-        theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
-        section_name = 'AFTER POST', 
-        date_time = 'ANY TIME', 
-        subsections = {
-            'your posted code is ': search_form.input.data, 
-        }
-    )
-
 @app.route('/auth', methods=['GET', 'POST'])
-def test_auth():
+def authentication():
     if request.method == 'GET': 
         return j2_env.get_template('section_basic_form.jinja').render(
             theme_colour = '#8E5D00',
-            sections = ['auth', 'files', 'error'],
+            sections = get_section(login_utils.current_user),
             section_name = 'AUTH', 
-            date_time = 'ANY TIME', 
             form = LoginForm(),
             submit_to = '/auth'
         )
@@ -74,30 +59,37 @@ def test_auth():
     if not login_form.validate_on_submit(): 
         return j2_env.get_template('error.jinja').render(
             theme_colour = '#8E5D00',
-            sections = ['auth', 'files', 'error'],
+            section_name = 'auth', 
+            sections = get_section(login_utils.current_user),
             error_message = 'NOT VALID ON SUBMIT', 
         )
     if not db_utils.is_correct(login_form.username.data, login_form.password.data): 
         return j2_env.get_template('error.jinja').render(
             theme_colour = '#8E5D00',
-            sections = ['auth', 'files', 'error'],
+            section_name = 'auth', 
+            sections = get_section(login_utils.current_user),
             error_message = 'INCORRECT PASSWORD OR USERNAME', 
         )
     user_session = login_utils.UserSession(login_form.username.data)
     login_utils.login_user(user_session)
-    return redirect('authed')
-
-@app.route('/authed', methods=['GET'])
-@login_utils.login_required
-def test_authed(): 
-    return j2_env.get_template('section_article.jinja').render(
+    return j2_env.get_template('notify.jinja').render(
         theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
-        section_name = str(login_utils.current_user.get_id()), 
-        date_time = 'ANY TIME', 
-        subsections = {}
+        section_name = 'auth', 
+        sections = get_section(login_utils.current_user), 
+        notification = 'LOGIN SUCCESS'
     )
 
+@app.route('/logout', methods=['GET'])
+@login_utils.login_required
+def logout_user(): 
+    login_utils.logout_user()
+    return j2_env.get_template('notify.jinja').render(
+        theme_colour = '#082567',
+        section_name = 'logout', 
+        sections = get_section(login_utils.current_user), 
+        notification = 'LOGOUT SUCCESS'
+    )
+    
 @app.route('/files', methods=['GET'])
 @login_utils.login_required
 def dirtree():
@@ -120,7 +112,7 @@ def dirtree():
     if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
     return j2_env.get_template('section_filesystem.jinja').render(
         theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
+        sections = get_section(login_utils.current_user),
         section_name = f'Private directory of {login_utils.current_user.name}',
         username = login_utils.current_user.name,
         tree = make_tree(abs_usr_dir)
@@ -133,21 +125,9 @@ def test_download(filename: str):
         return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
     else: return j2_env.get_template('error.jinja').render(
         theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
+        sections = get_section(login_utils.current_user),
         error_message = 'INVALID ACCESS'
     )
-
-@app.route('/error', methods=['GET'])
-def test_error(): 
-    return j2_env.get_template('error.jinja').render(
-        theme_colour = '#8E5D00',
-        sections = ['auth', 'files', 'error'],
-        error_message = 'THIS IS ERROR PAGE'
-    )
-
-@app.route('/exception', methods=['GET'])
-def test_exception(): 
-    raise Exception("SOMETHING")
 
 if __name__ == '__main__':
     app.run()
