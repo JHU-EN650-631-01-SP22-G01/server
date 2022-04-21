@@ -29,9 +29,9 @@ csrf.init_app(app)
 # database initialise
 db_tables = db_utils.init_dbmanager(app, 
     init_users_json=[{"username": "root", "password":"123456789"}], 
-    init_records_json= [{"type":"TOP SECRET"} for _ in range(100)] 
-        | [{"type": "SECRET"} for _ in range(100)] 
-        | [{"type": "PUBLIC"} for _ in range(100)]
+    init_records_json= [{"type":"TOP SECRET"} for _ in range(100)] \
+        + [{"type": "SECRET"} for _ in range(100)] \
+        + [{"type": "PUBLIC"} for _ in range(100)]
 )
 
 # login manager initialise
