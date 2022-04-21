@@ -21,14 +21,14 @@
         <ul>
         <li><a href="/"> MAIN </a> </li>
         {% for name in sections %}
-          <li><a href="{{ name }}">  {{ name.upper() }} </a></li>
+          <li><a href="{{ name }}">  {{ name.upper() | escape }} </a></li>
         {% endfor %}
         </ul>
       </nav>
     </header>
     <hr />
     <main id="main" role="main">
-        <h1 style='text-align:center;'> ❌ {{ error_message }} ❌ </h1>
+        <h1 style='text-align:center;'> ❌ {{ error_message | escape }} ❌ </h1>
     </main>
     <hr />
     <footer class="footer" role="contentinfo"></footer>

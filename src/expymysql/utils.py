@@ -34,7 +34,7 @@ def init_dbmanager(
     if init_users_json is not None and not tables.users.is_empty(): 
         for user_json in json.loads(init_users_json): tables.users.register(**user_json)
     if init_records_json is not None and not tables.records.is_empty(): 
-        for record_json in json.loads(init_records_json): tables.records.record(**record_json)
+        for record_json in json.loads(init_records_json): tables.records.record(record_json)
     return tables
 
 def is_correct(username: str, password: str) -> bool: 

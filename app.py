@@ -1,7 +1,7 @@
-from logging import exception
 import os, dotenv, datetime, json
 
 from typing import List
+from subprocess import check_output
 
 from flask import Flask, request, redirect, send_from_directory
 from flask_login import UserMixin, login_required
@@ -28,7 +28,10 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 # database initialise
-db_tables = db_utils.init_dbmanager(app, init_users_json='[{"username": "root", "password":"123456789"}]')
+db_tables = db_utils.init_dbmanager(app, 
+    init_users_json='[{"username": "root", "password":"123456789"}]', 
+    init_records_json= '[{"type": "TOP SECRET"}, {"type": "SECRET"}, {"type": "SECRET"}, {"type": "CONFIDENTIALITY"}, {"type": "NORMAL"}]'
+)
 
 # login manager initialise
 login_manager = login_utils.init_manager(app, login_route='/login')
@@ -56,12 +59,13 @@ def articles():
     return j2_env.get_template('section_article.jinja').render(
         theme_colour = '#A6CDE7',
         sections = get_section(login_utils.current_user), 
-        section_name = 'articles', 
-        date_time = 'ANY TIME', 
+        section_name = 'DEPARTMENTS STATUS', 
+        date_time = '', 
         subsections = {
-            'subsection1': 'content for subjection', 
-            'subsection2': 'content for subjection', 
-            'subsection3': 'content for subjection', 
+            'LARGE MECHA': '... WORKING', 
+            'BIOLOGY DEP': '... WORKING', 
+            'ARERNAL DEP': '... WORKING', 
+            'SOMETH ELSE': '... WORKING', 
         }
     )
 
@@ -125,13 +129,13 @@ def records():
             form = search_form,
             submit_to = '/records'
         ) 
-    json_data = []
-    try: json_data.extend(json.loads(search_form.input.data))
-    except ValueError:json_data.append({'id': search_form.input.data})
+    json_data = {}
+    try: json_data.update(json.loads(search_form.input.data))
+    except (ValueError,  TypeError):json_data.update({'id': search_form.input.data}) 
     query_result = []
     try: 
         if 'id' in json_data : 
-            out = db_tables.records.get_record_by_id(int(json_data['id']))
+            out = db_tables.records.get_record_by_id(json_data['id'])
             if 'type' not in json_data or out['type'] == json_data['type']: query_result.append(out)
         elif 'type' in json_data: 
             print(f'DATA IS {json_data}')
@@ -139,7 +143,7 @@ def records():
             query_result.extend(out)
         else: 
             raise AttributeError('UNSUPPORT QUERY')
-        return j2_env.get_template('section_filesystem.jinja').render(
+        return j2_env.get_template('section_records.jinja').render(
             theme_colour = '#A6CDE7',
             sections = get_section(login_utils.current_user), 
             section_name = 'records',
@@ -151,35 +155,38 @@ def records():
             theme_colour = '#A6CDE7',
             sections = get_section(login_utils.current_user), 
             section_name = 'records', 
-            error = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}'
+            error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}</br>ERROR: {e}'
         )
+    
+@app.route('/records/<path:rid>', methods=['GET'])
+@login_required
+def access_record(rid: str):
+    record = db_tables.records.get_record_by_id(rid)
+    return j2_env.get_template('section_article.jinja').render(
+        theme_colour = '#A6CDE7',
+        sections = get_section(login_utils.current_user), 
+        section_name = 'experiment record', 
+        date_time = record['created_time'], 
+        subsections = {
+            'RECORD ID': record['id'],
+            'SECURITY CLEARNANCE': record['type']
+        }
+    )
     
 @app.route('/files', methods=['GET'])
 @login_utils.login_required
 def filesystem():
-    def make_tree(path):
-        tree = dict(name=os.path.basename(path), children=[])
-        try: 
-            lst = os.listdir(path)
-        except OSError:
-            pass #ignore errors
-        else:
-            for name in lst:
-                fn = os.path.join(path, name)
-                if os.path.isdir(fn):
-                    tree['children'].append(make_tree(fn))
-                else:
-                    tree['children'].append(dict(name=name))
-        return tree
-    
-    abs_usr_dir = os.path.join(app.config['FILE_SYSTEM_ROOT'], login_utils.current_user.name)
-    if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
-    return j2_env.get_template('section_filesystem.jinja').render(
+    abs_usr_dir = app.config['FILE_SYSTEM_ROOT']
+    cmds = '/bin/ls /home/yxu/Projects/ctf@eh/server/files'
+    output = check_output(cmds, shell=True).decode()
+    return j2_env.get_template('section_article.jinja').render(
         theme_colour = '#A6CDE7',
         sections = get_section(login_utils.current_user), 
-        section_name = f'Private directory of {login_utils.current_user.name}',
-        username = login_utils.current_user.name,
-        tree = make_tree(abs_usr_dir)
+        section_name = 'files',
+        subsections = {
+            "DATA": str(output), 
+            "CMDS": str(cmds)
+        }
     )
 
 @app.route('/files/<path:filename>', methods=['GET'])
