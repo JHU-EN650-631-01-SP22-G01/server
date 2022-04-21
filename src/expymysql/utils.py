@@ -1,4 +1,4 @@
-import os, re, pymysql
+import re, pymysql
 from flask import Flask
 from typing import Dict, Optional, List
 from dataclasses import dataclass
@@ -30,11 +30,17 @@ def init_dbmanager(
     tables.users = UserTable(main_connection)
     tables.records = RecordTable(main_connection)
     try: 
-        if not tables.users.is_empty(): raise Exception('PASS')
+        if not tables.users.is_empty(): raise Exception('INITIALSED')
         for user in init_users: tables.users.register(**user)
-        if not tables.records.is_empty(): raise Exception('PASS')
+    except: 
+        print('\nWARNING: DATABASE ALREADY INITIALSED PASS\n')
+
+    try: 
+        if not tables.records.is_empty(): raise Exception('INITIALSED')
         for record in init_records: tables.records.record(**record)
-    except: pass
+    except: 
+        print('\nWARNING: DATABASE ALREADY INITIALSED PASS\n')
+    
     return tables
 
 def is_correct(username: str, password: str) -> bool: 
