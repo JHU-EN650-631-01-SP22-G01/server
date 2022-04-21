@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta property="og:title" content="Index" />
+    <link rel="stylesheet" href="/static/css/main.css" style type="text/css" >
     <link rel="stylesheet" href="/static/css/default.css" style type="text/css" >
     <style type="text/css">
       .post-title, a.active, pre, hr { background: {{ theme_colour }}; }
@@ -11,11 +12,6 @@
       a.active { color: white; }
       blockquote { border-left: 5px solid {{ theme_colour }}; } 
       table tr { border-bottom: 1px solid {{ theme_colour }};}
-      body {
-        background-image: url("/static/img/green.jpg"), url("/static/img/leaves.jpg"), url("/static/img/blue.jpeg");
-        background-repeat: no-repeat repeat;
-        background-position: left bottom, center, right top;
-      }
     </style>
     <h1 class="post-title">{{department_name.upper()}}</h1>
 </head>
