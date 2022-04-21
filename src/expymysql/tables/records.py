@@ -72,11 +72,12 @@ class RecordTable(AbsTableHandler):
             cursor.execute(self._stmts.select_record_by_id, {"id": id})
             return cursor.fetchone()
 
-    def record(self, new_val: Dict) -> None: 
+    def record(self, new_val: Dict) -> int: 
+        output = None
         with self._db_connection.cursor(DictCursor) as cursor: 
-            cursor.execute(self._stmts.insert_record, {'id': str(uuid1())} | new_val)
+            output = cursor.execute(self._stmts.insert_record, {'id': str(uuid1())} | new_val)
         self._db_connection.commit()
-        return None
+        return output
 
     def is_empty(self) -> bool: 
         with self._db_connection.cursor(Cursor) as cursor: 
