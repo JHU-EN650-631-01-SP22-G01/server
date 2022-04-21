@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-from flask_login import AnonymousUserMixin
+from flask_login import AnonymousUserMixin, UserMixin
 from ..sqlalchemy import UserDbModel
 
 
