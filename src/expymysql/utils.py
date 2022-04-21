@@ -20,7 +20,6 @@ def init_dbmanager(
     init_users: List[Dict] = [], 
     init_records: List[Dict] = []
 ) -> __Table:
-    if db_uri is None: db_uri = os.environ['DB_URI']
     db_paras_regex = r'.+:\/\/(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>\d+)(\/.+)?'
     db_paras = re.match(db_paras_regex, db_uri).groupdict()
     main_connection = pymysql.connect(
