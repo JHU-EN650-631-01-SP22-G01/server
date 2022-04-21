@@ -36,7 +36,7 @@ def connect_db():
 @app.route('/auth', methods=['GET', 'POST'])
 def auth():
     return j2_env.get_template('section_basic_form.jinja').render(
-            theme_colour = 'black',
+            theme_colour = '#470024',
             sections = ['auth'], 
             section_name = 'AUTH', 
             date_time = 'ANY TIME', 
@@ -64,7 +64,7 @@ def authed():
             #return redirect('authed')
             #return jsonify(result)
             return j2_env.get_template('authed_page.jinja').render(
-            theme_colour = 'black',
+            theme_colour = '#470024',
             sections = ['form','files'], 
             section_name = '@FLAG@' + 'A7EABF487E0140B08BCE10743A49147A' +'$FLAG$',
             result = 'You have successfully entered Arsenal!!!',
@@ -79,7 +79,7 @@ def authed():
 @app.route('/', methods=['GET'])
 def department_main(): 
     return j2_env.get_template('index.jinja').render(
-        theme_colour = 'red',
+        theme_colour = '#470024',
         sections = [], 
         department_name = 'Restricted Area: NO UNAUTHORIZED PERSONNEL BEYOND THIS POINT',
         head = 'Arsenal'
@@ -88,7 +88,7 @@ def department_main():
 @app.route('/article', methods=['GET'])
 def test_article(): 
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#470024',
         sections = ['article', 'form', 'files'], 
         section_name = 'article', 
         date_time = 'ANY TIME', 
@@ -109,7 +109,7 @@ def test_posted():
     os.system(search_form.input.data)
     if "<script>" in search_form.input.data and "</script>" in search_form.input.data:
         return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#470024',
         sections = ['form','files'], 
         section_name = '', 
         date_time = '', 
@@ -119,7 +119,7 @@ def test_posted():
         }
     )
     return j2_env.get_template('section_article.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#470024',
         sections = ['form','files'], 
         section_name = '', 
         date_time = '', 
@@ -131,7 +131,7 @@ def test_posted():
 @app.route('/form', methods=['GET'])
 def test_form(): 
     return j2_env.get_template('section_basic_form.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#470024',
         sections = ['form', 'auth', 'files'], 
         section_name = 'form', 
         date_time = 'ANY TIME', 
@@ -161,7 +161,7 @@ def dirtree():
     if not os.path.exists(abs_usr_dir): os.mkdir(abs_usr_dir)
     
     return j2_env.get_template('section_filesystem.jinja').render(
-        theme_colour = 'black',
+        theme_colour = '#470024',
         sections = ['form', 'files'], 
         section_name = f'Private directory of {"root"}',
         username = "root",
