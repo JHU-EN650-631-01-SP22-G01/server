@@ -30,14 +30,13 @@ csrf.init_app(app)
 db_tables = db_utils.init_dbmanager(app, 
     db_uri=os.environ['DB_URI'],
     init_users=[{"username": "root", "password":"123456789"}], 
-    init_records= [{"type":"TOP SECRET"} for _ in range(100)] \
-        + [{"type": "SECRET"} for _ in range(100)] \
-        + [{"type": "PUBLIC"} for _ in range(100)]
+    init_records= [{"type":"TOP SECRET"} for _ in range(50)] \
+        + [{"type": "SECRET"} for _ in range(50)] \
+        + [{"type": "PUBLIC"} for _ in range(50)]
 )
 
 # login manager initialise
 login_manager = login_utils.init_manager(app, login_route='/login')
-
 
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
@@ -160,7 +159,7 @@ def records():
     
 @app.route('/records/<path:id>', methods=['GET'])
 @login_required
-def get_record(id: str): 
+def access_record(id: str): 
     record = db_tables.records.get_record_by_id(id)
     if record is None: 
         return j2_env.get_template('error.jinja').render(
@@ -212,12 +211,12 @@ def filesystem():
 
 @app.route('/files/<path:filename>', methods=['GET'])
 @login_utils.login_required
-def test_download(filename: str):
+def download_file(filename: str):
     if filename.startswith(login_utils.current_user.name): 
-        return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename, filename)
+        return send_from_directory(app.config['FILE_SYSTEM_ROOT'], filename)
     else: return j2_env.get_template('error.jinja').render(
         theme_colour = '#082567',
-        sections = ['article', 'form', 'auth', 'files', 'error'], 
+        sections = get_section(login_utils.current_user), 
         error_message = 'INVALID ACCESS'
     )
 

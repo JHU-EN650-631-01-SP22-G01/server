@@ -32,14 +32,14 @@ def init_dbmanager(
     try: 
         if not tables.users.is_empty(): raise Exception('INITIALSED')
         for user in init_users: tables.users.register(**user)
-    except: 
-        print('\nWARNING: USER TABLE ALREADY INITIALSED PASS\n')
+    except Exception as e: 
+        print(f'\nWARNING: USER TABLE ALREADY INITIALSED;\nERROR: {e}')
 
     try: 
         if not tables.records.is_empty(): raise Exception('INITIALSED')
         for record in init_records: tables.records.record(**record)
-    except: 
-        print('\nWARNING: RECORD TABLE INITIALSED PASS\n')
+    except Exception as e: 
+        print(f'\nWARNING: RECORD TABLE ALREADY INITIALSED;\nERROR: {e}')
     
     return tables
 
