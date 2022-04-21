@@ -1,7 +1,6 @@
-from logging import exception
 import os, dotenv, datetime, json
 
-from typing import List
+from typing import List, Dict
 
 from flask import Flask, request, redirect, send_from_directory
 from flask_login import UserMixin, login_required
@@ -28,13 +27,17 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 # database initialise
-db_tables = db_utils.init_dbmanager(app, init_users_json='[{"username": "root", "password":"123456789"}]')
+db_tables = db_utils.init_dbmanager(app, 
+    init_users_json=[{"username": "root", "password":"123456789"}], 
+    init_records_json= [{"type":"TOP SECRET"} for _ in range(100)] 
+        | [{"type": "SECRET"} for _ in range(100)] 
+        | [{"type": "PUBLIC"} for _ in range(100)]
+)
 
 # login manager initialise
 login_manager = login_utils.init_manager(app, login_route='/login')
 
-# CORS to allow the cross-domain issues
-# CORS(app, supports_credentials=True)
+
 templates_dir = os.path.join(project_root_dir, 'templates')
 j2_env = Environment(loader=FileSystemLoader(templates_dir), trim_blocks=True)
 
@@ -125,12 +128,12 @@ def records():
             form = search_form,
             submit_to = '/records'
         ) 
-    json_data = []
-    try: json_data.extend(json.loads(search_form.input.data))
-    except ValueError:json_data.append({'id': search_form.input.data})
+    json_data: Dict = {}
+    try: json_data.update(json.loads(search_form.input.data))
+    except (ValueError, TypeError):json_data.update({'id': search_form.input.data})
     query_result = []
     try: 
-        if 'id' in json_data : 
+        if 'id' in json_data: 
             out = db_tables.records.get_record_by_id(int(json_data['id']))
             if 'type' not in json_data or out['type'] == json_data['type']: query_result.append(out)
         elif 'type' in json_data: 
@@ -139,7 +142,7 @@ def records():
             query_result.extend(out)
         else: 
             raise AttributeError('UNSUPPORT QUERY')
-        return j2_env.get_template('section_filesystem.jinja').render(
+        return j2_env.get_template('section_list.jinja').render(
             theme_colour = '#082567',
             sections = get_section(login_utils.current_user), 
             section_name = 'records',
@@ -151,7 +154,7 @@ def records():
             theme_colour = '#082567',
             sections = get_section(login_utils.current_user), 
             section_name = 'records', 
-            error = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}'
+            error_message = f'UNSUPPORT QUERY FORMAT: {search_form.input.data}, </br> ERROR: {e}'
         )
     
 @app.route('/files', methods=['GET'])

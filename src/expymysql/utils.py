@@ -1,7 +1,6 @@
-from operator import contains
-import os, re, json, pymysql
+import os, re, pymysql
 from flask import Flask
-from typing import Optional
+from typing import Dict, Optional, List
 from dataclasses import dataclass
 from pymysql.constants import CLIENT
 
@@ -18,8 +17,8 @@ tables = __Table(None, None)
 def init_dbmanager(
     app: Flask, 
     db_uri: Optional[str] = None, 
-    init_users_json: Optional[str] = None, 
-    init_records_json: Optional[str] = None
+    init_users: List[Dict] = [], 
+    init_records: List[Dict] = []
 ) -> __Table:
     if db_uri is None: db_uri = os.environ['DB_URI']
     db_paras_regex = r'.+:\/\/(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>\d+)(\/.+)?'
@@ -31,10 +30,12 @@ def init_dbmanager(
     )
     tables.users = UserTable(main_connection)
     tables.records = RecordTable(main_connection)
-    if init_users_json is not None and not tables.users.is_empty(): 
-        for user_json in json.loads(init_users_json): tables.users.register(**user_json)
-    if init_records_json is not None and not tables.records.is_empty(): 
-        for record_json in json.loads(init_records_json): tables.records.record(**record_json)
+    try: 
+        if not tables.users.is_empty(): raise Exception('PASS')
+        for user in init_users: tables.users.register(**user)
+        if not tables.records.is_empty(): raise Exception('PASS')
+        for record in init_records: tables.records.record(**record)
+    except: pass
     return tables
 
 def is_correct(username: str, password: str) -> bool: 

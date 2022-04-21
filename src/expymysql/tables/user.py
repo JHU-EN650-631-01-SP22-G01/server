@@ -98,7 +98,7 @@ class UserTable(AbsTableHandler):
     def is_empty(self) -> bool: 
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(self._stmts.whether_is_empty)
-            return cursor.fetchone() is not None
+            return cursor.fetchone() is None
 
     def is_correct_password(self, username: str, password: str) -> bool:
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
