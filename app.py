@@ -57,6 +57,8 @@ def authed():
         g.db = sql.connect("database.db")
         cur = g.db.execute("SELECT * FROM employees WHERE username = '%s' AND password = '%s'" %(uname, pword))
         #xxx@xxx.xxx' OR 1 = 1 LIMIT 1 -- ' ]
+        # ' or 1=1--
+        # -- in sql means comment
         print("SELECT * FROM employees WHERE username = '%s' AND password = '%s'" %(uname, pword))
         print(cur.fetchall)
         if cur.fetchone():
