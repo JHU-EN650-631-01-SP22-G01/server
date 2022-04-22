@@ -67,10 +67,10 @@ def authed():
             #return jsonify(result)
             return j2_env.get_template('authed_page.jinja').render(
             theme_colour = 'black',
-            sections = ['form','files'], 
-            section_name = 'CTF:A7EABF487E0140B08BCE10743A49147A',
+            sections = ['form','files'],
+            section_name = 'CTF:A7EABF487E0140B08BCE',
             result = 'You have successfully entered Arsenal!!!',
-            result2 = 'Now it is your time to choose the most powerful weapon. You can move Shark_Cannon.html to \'files/root\' to acquire it!',            
+            result2 = 'Now it is your time to choose the most powerful weapon. You can move Shark_Cannon.html to \'files/root\' to acquire it!',
             subsections = {}
         )
         else:
