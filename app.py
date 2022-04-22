@@ -118,6 +118,7 @@ def test_posted():
         subsections = {
             'You have acquired a new skill: \'afterburner\'': "CTF:1278137283jshdjkashd", 
             'You should have obtained 4 flags in total within this web sever!!!':"",
+            'If not, go back and dig more!!!':"",
         }
     )
     return j2_env.get_template('section_article.jinja').render(
