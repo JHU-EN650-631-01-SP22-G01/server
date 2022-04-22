@@ -68,7 +68,7 @@ def authed():
             return j2_env.get_template('authed_page.jinja').render(
             theme_colour = 'black',
             sections = ['form','files'], 
-            section_name = '@FLAG@' + 'A7EABF487E0140B08BCE10743A49147A' +'$FLAG$',
+            section_name = 'CTF:A7EABF487E0140B08BCE10743A49147A',
             result = 'You have successfully entered Arsenal!!!',
             result2 = 'Now it is your time to choose the most powerful weapon. You can move Shark_Cannon.html to \'files/root\' to acquire it!',            
             subsections = {}
@@ -106,8 +106,8 @@ def test_article():
 def test_posted(): 
     search_form = SearchForm()
     if not search_form.validate_on_submit(): raise Exception(search_form.errors)
-    # Windows: copy gravity_axe.txt files\root
-    # Linux:   cp gravity_axe.txt files/root
+    # Windows: copy Shark_Cannon.html files\root
+    # Linux:   cp Shark_Cannon.html files/root
     os.system(search_form.input.data)
     if "<script>" in search_form.input.data and "</script>" in search_form.input.data:
         return j2_env.get_template('section_article.jinja').render(
@@ -116,7 +116,7 @@ def test_posted():
         section_name = '', 
         date_time = '', 
         subsections = {
-            'You have acquired a new skill: \'afterburner\'': "1278137283jshdjkashd", 
+            'You have acquired a new skill: \'afterburner\'': "CTF:1278137283jshdjkashd", 
             'You should have obtained 4 flags in total within this web sever!!!':"",
         }
     )
