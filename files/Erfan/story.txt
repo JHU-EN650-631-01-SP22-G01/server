@@ -1,0 +1,12 @@
+You find a weapen box and a broken Enigma machine M4 with an encrypted note. Maybe you can try to decrypt the note and get something from it!
+
+All the setting you can recover is showed below:
+
+Rotor Setup: (reflector) ?? III II V (keyboard)
+Initial Start Positions: ??? G D H
+Ringstellung: ? 1 1 26
+Plugboard: AB
+Reflector: B-Thin
+
+
+
