@@ -6,8 +6,11 @@ from .user import UserSession
 login_manager = LoginManager()
 
 @login_manager.user_loader
-def load_user(uid):
+def load_user_by_id(uid):
     return UserSession.get_by_id(uid)
+
+def load_user_by_name(uname):
+    return UserSession.get_by_username(uname)
 
 def init_manager(app: Flask, login_route: str) -> LoginManager:
     login_manager.init_app(app)

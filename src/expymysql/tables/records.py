@@ -10,8 +10,10 @@ class RecordStmts(AbsSqlStmtHolder):
     @property
     def create_db(self) -> str: return """
         create table IF NOT EXISTS G01.Record (
-            id      varchar(128)                        primary key,
-            type    varchar(128)                        not null,
+            id              varchar(128)                        primary key,
+            type            varchar(128)                        not null,
+            slevel          int                                 not null, 
+            content         varchar(2048), 
             created_time timestamp default CURRENT_TIMESTAMP not null
         );
     """
@@ -23,7 +25,8 @@ class RecordStmts(AbsSqlStmtHolder):
 
     @property
     def select_records_by_type(self) -> str: return """
-        SELECT * FROM G01.Record WHERE type='{type}'
+        SELECT * FROM G01.Record 
+        WHERE type='{type}' AND slevel >= {slevel}
     """
 
     @property
@@ -34,8 +37,8 @@ class RecordStmts(AbsSqlStmtHolder):
 
     @property
     def insert_record(self) -> str: return """
-        INSERT INTO G01.Record(id, type)
-        VALUE (%(id)s, %(type)s)
+        INSERT INTO G01.Record(id, type, slevel, content)
+        VALUE (%(id)s, %(type)s, %(slevel)s, %(content)s)
     """
 
     @property
@@ -60,22 +63,23 @@ class RecordTable(AbsTableHandler):
             cursor.execute(self._stmts.select_all_records)
             return cursor.fetchall()
 
-    def get_records_by_type(self, type: str) -> Tuple[Dict]:
+    def get_records_by_type(self, type: str, security_level: int=10) -> Tuple[Dict]:
         with self._db_connection.cursor(DictCursor) as cursor:
-            cmd = self._stmts.select_records_by_type.format(type=type)
+            cmd = self._stmts.select_records_by_type.format(type=type, slevel=security_level)
             cursor.execute(cmd)
-            if ';' in cmd: raise Exception('Flag: d0e66559de3b929b76f9b86cf5a10b76776a626f')
-            return cursor.fetchall()
+            output = cursor.fetchall()
+            print(output)
+            return output
 
     def get_record_by_id(self, id: str) -> Dict:
         with self._db_connection.cursor(DictCursor) as cursor:
             cursor.execute(self._stmts.select_record_by_id, {"id": id})
             return cursor.fetchone()
 
-    def record(self, type: str) -> int: 
+    def record(self, type: str, content: str, security_level: int=10, ) -> int: 
         output = None
         with self._db_connection.cursor(DictCursor) as cursor: 
-            output = cursor.execute(self._stmts.insert_record, {'id': str(uuid1()), 'type': type})
+            output = cursor.execute(self._stmts.insert_record, {'id': str(uuid1()), 'type': type, 'content': content, 'slevel': security_level})
         self._db_connection.commit()
         return output
 

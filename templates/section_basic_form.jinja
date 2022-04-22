@@ -18,8 +18,10 @@
             }).then((result) => 
                 Swal.fire({
                     icon: 'info', 
-                    text: 'The system support advanced format of searching. Specificially, the searching txt can be json format like '+
-                    '{"id": "BKIGIDWQB-BHUAD-DBKBDAD", "type": "TOP SECRET", "created_time": 321412312}'
+                    text: 'The system supports both normal querying and the advanced query. \n' +
+                    'As the the normal one, the input query string will be handled as the id of records. For example, " 19fa1349" means to query the record with such an id. \n' + 
+                    'The system support advanced format of searching. Specificially, the searching txt can be json format like '+
+                    '{"id": "BKIGIDWQB-BHUAD-DBKBDAD", "type": "experiment"} or {"type": "experiment"}'
                 })
             )
         }

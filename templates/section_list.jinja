@@ -34,7 +34,7 @@
         <h1>{{ query_str }}</h1>
         <ul>
         {%- for item in query_result  %}
-            <li><a href="/{{ section_name }}/{{ item.id }}">{{ item.id }}</a>
+            <li><a href="/{{ section_name }}/{{ item.id }}">{{ item.id }} (Security Level: {{ item.slevel }})</a>
         {%- endfor %}
         </ul>
     </main>

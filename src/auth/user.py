@@ -29,9 +29,9 @@ class UserSession(UserMixin):
     @classmethod
     def get_by_id(cls, id: str) -> UserSession: 
         db_user = db_utils.tables.users.get_user_by_id(id)
-        return UserSession(**db_user)
+        return UserSession(db_user['id'], db_user['username'])
 
     @classmethod 
     def get_by_username(cls, username: str) -> UserSession: 
         db_user = db_utils.tables.users.get_user_by_username(username)
-        return UserSession(**db_user)
+        return UserSession(db_user['id'], db_user['username'])

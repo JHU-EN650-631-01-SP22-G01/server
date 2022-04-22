@@ -12,8 +12,9 @@ class UserStmts(AbsSqlStmtHolder):
     def create_db(self) -> str: return """
         create table IF NOT EXISTS G01.User (
             id              int auto_increment                  primary key,
+            slevel          int                                 not null, 
             username        varchar(128)                        not null,
-            password_hash   varchar(128)                        not null,
+            password_hash   varchar(1024)                       not null,
             last_login_time timestamp default CURRENT_TIMESTAMP not null,
             constraint      User_username_uindex            unique (username)
         );
@@ -21,19 +22,19 @@ class UserStmts(AbsSqlStmtHolder):
 
     @property
     def insert_new_user(self) -> str: return """
-        INSERT INTO G01.User(username, password_hash)
-        VALUE (%(username)s, %(password_hash)s)
+        INSERT INTO G01.User(username, password_hash, slevel)
+        VALUE (%(username)s, %(password_hash)s, %(slevel)s)
     """
 
     @property
     def select_user_by_id(self) -> str: return """
-        SELECT id, username FROM G01.User
+        SELECT * FROM G01.User
         WHERE id = %(id)s
     """
     
     @property
     def select_user_by_username(self) -> str: return """
-        SELECT id, username FROM G01.User
+        SELECT * FROM G01.User
         WHERE username = %(username)s
     """
 
@@ -70,12 +71,13 @@ class UserTable(AbsTableHandler):
         if not isinstance(holder, UserStmts): raise TypeError("IMPOSSIBLE")
         return holder
 
-    def register(self, username: str, password: str) -> None:
+    def register(self, username: str, password: str, slevel=10) -> None:
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
+        username = username.lower()
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(
                 query=self._stmts.insert_new_user, 
-                args={'username': username, 'password_hash': password_hash}
+                args={'username': username, 'password_hash': password_hash, 'slevel': slevel}
             )
         self._db_connection.commit()
         return None
@@ -85,12 +87,14 @@ class UserTable(AbsTableHandler):
             cursor.execute(self._stmts.select_user_by_id, {"id": id})
             return cursor.fetchone()
     
-    def get_user_by_username(self, username: int) -> Dict: 
+    def get_user_by_username(self, username: str) -> Dict: 
+        username = username.lower()
         with self._db_connection.cursor(DictCursor) as cursor:
             cursor.execute(self._stmts.select_user_by_username, {"username": username})
             return cursor.fetchone()
     
     def contains(self, username: str) -> bool: 
+        username = username.lower()
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(self._stmts.whether_username_exist, args={'username': username})
             return cursor.fetchone() is not None
@@ -101,6 +105,7 @@ class UserTable(AbsTableHandler):
             return cursor.fetchone() is None
 
     def is_correct_password(self, username: str, password: str) -> bool:
+        username = username.lower()
         password_hash = hashlib.sha224(str.encode(password)).hexdigest()
         with self._db_connection.cursor(Cursor) as cursor: 
             cursor.execute(

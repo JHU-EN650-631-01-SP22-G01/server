@@ -15,7 +15,7 @@ class LoginForm(FlaskForm):
         'Password', 
         validators=[
             DataRequired(message='⚠️ USERNAME CANNOT BE EMPTY'), 
-            Length(8,20)
+            Length(8,100)
         ], 
         render_kw={'placeholder':'PASSWORD'}
     )
