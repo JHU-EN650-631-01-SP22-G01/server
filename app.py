@@ -42,7 +42,7 @@ def department_main():
     return j2_env.get_template('index.jinja').render(
         theme_colour = '#8E5D00',
         sections = get_section(login_utils.current_user),
-        department_name = 'this department'
+        department_name = 'Erfan’s department'
     )
 
 @app.route('/auth', methods=['GET', 'POST'])
